@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceder | PortalPilot</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0A0E17 0%, #0F1118 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .login-container {
+            text-align: center;
+            padding: 40px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #0EA5E9, #3B82F6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+        .logo i {
+            font-size: 40px;
+            color: white;
+        }
+        h1 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        p {
+            color: #A0AEC0;
+            margin-bottom: 30px;
+        }
+        .buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0EA5E9, #3B82F6);
+            color: white;
+        }
+        .btn-outline {
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            color: #0EA5E9;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(14, 165, 233, 0.05);
+            border-radius: 12px;
+            max-width: 400px;
+        }
+        .info p {
+            margin: 0;
+            font-size: 12px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-robot"></i>
+        </div>
+        <h1>PortalPilot + Cyberyx</h1>
+        <p>Accede a tu cuenta empresarial</p>
+        <div class="buttons">
+            <a href="#" class="btn btn-primary" id="openAppBtn">
+                <i class="fas fa-external-link-alt"></i> Abrir Aplicación
+            </a>
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Volver al Sitio
+            </a>
+        </div>
+        <div class="info">
+            <p>⚠️ Para acceder al sistema, descarga e instala la aplicación PortalPilot en tu computadora.</p>
+            <p style="margin-top: 8px;">¿No tienes cuenta? <a href="compra.html" style="color:#0EA5E9;">Solicita una demo</a></p>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        document.getElementById('openAppBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Intenta abrir la app Flutter (protocolo personalizado)
+            window.location.href = 'portalpilot://login';
+            // Fallback: mostrar mensaje
+            setTimeout(function() {
+                alert('Si la aplicación no se abre automáticamente, asegúrate de tener PortalPilot instalado.');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
