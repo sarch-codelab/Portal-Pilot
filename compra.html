@@ -6,316 +6,63 @@
     <title>Solicitar Demo | PortalPilot</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Estilos adicionales para el formulario */
-        .form-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #0A0E17 0%, #0F1118 100%);
-        }
-
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #111827;
-            border-radius: 24px;
-            border: 1px solid rgba(14, 165, 233, 0.2);
-            overflow: hidden;
-        }
-
-        .form-header {
-            background: linear-gradient(135deg, #0EA5E9, #3B82F6);
-            padding: 40px;
-            text-align: center;
-        }
-
-        .form-header h1 {
-            color: white;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .form-header p {
-            color: rgba(255,255,255,0.8);
-        }
-
-        .form-body {
-            padding: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #A0AEC0;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 14px 16px;
-            background: #0A0E17;
-            border: 1px solid #2D3748;
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #0EA5E9;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #0EA5E9, #3B82F6);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.3);
-        }
-
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .success-message i {
-            font-size: 60px;
-            color: #10B981;
-            margin-bottom: 20px;
-        }
-
-        .success-message h2 {
-            color: white;
-            margin-bottom: 16px;
-        }
-
-        .success-message p {
-            color: #A0AEC0;
-            margin-bottom: 24px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0A0E17; color: #fff; }
+        .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(14,165,233,0.2); border-radius: 32px; transition: all 0.3s; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .navbar { position: fixed; top:0; width:100%; background: rgba(10,14,23,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 1000; padding: 16px 0; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; max-width: 1280px; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg,#0EA5E9,#3B82F6); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .logo-text { font-size: 20px; font-weight: 700; }
+        .logo-badge { font-size: 10px; background: rgba(14,165,233,0.2); padding: 4px 10px; border-radius: 30px; color: #0EA5E9; }
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-link { color: #A0AEC0; text-decoration: none; font-size: 15px; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #0EA5E9; }
+        .nav-highlight { color: #0EA5E9; font-weight: 600; }
+        .nav-buttons { display: flex; gap: 12px; }
+        .btn-outline, .btn-primary { padding: 10px 24px; border-radius: 40px; font-size: 14px; font-weight: 600; text-decoration: none; transition: 0.3s; }
+        .btn-outline { border: 1px solid rgba(14,165,233,0.5); color: #0EA5E9; background: transparent; }
+        .btn-primary { background: linear-gradient(135deg,#0EA5E9,#3B82F6); color: white; }
+        .btn-primary:hover, .btn-outline:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(14,165,233,0.4); }
+        .menu-toggle { display: none; font-size: 28px; cursor: pointer; }
+        .form-section { padding: 140px 0 80px; }
+        .form-container { overflow: hidden; }
+        .form-header { background: linear-gradient(135deg, #0EA5E9, #3B82F6); padding: 40px; text-align: center; }
+        .form-header h1 { font-size: 32px; margin-bottom: 12px; }
+        .form-body { padding: 40px; }
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: block; color: #A0AEC0; font-size: 12px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 16px; background: #0A0E17; border: 1px solid #2D3748; border-radius: 16px; color: white; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0EA5E9; box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { flex: 1; }
+        .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg,#0EA5E9,#3B82F6); border: none; border-radius: 40px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(14,165,233,0.4); }
+        .success-message { display: none; text-align: center; padding: 40px; }
+        .success-message i { font-size: 60px; color: #10B981; margin-bottom: 20px; }
+        .footer { background: #070B12; padding: 50px 0 20px; margin-top: 40px; text-align: center; font-size: 13px; color: #718096; }
+        @media (max-width: 768px) { .nav-menu, .nav-buttons { display: none; } .menu-toggle { display: block; } .form-row { flex-direction: column; gap: 0; } .form-body { padding: 24px; } }
+        .visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">
-                <div class="logo-icon"><i class="fas fa-robot"></i></div>
-                <span class="logo-text">PORTALPILOT</span>
-                <span class="logo-badge">+ CYBERYX</span>
-            </div>
-            <div class="nav-menu">
-                <a href="index.html" class="nav-link">Inicio</a>
-                <a href="features.html" class="nav-link">Características</a>
-                <a href="pricing.html" class="nav-link">Planes</a>
-                <a href="compra.html" class="nav-link active nav-highlight">Solicitar Demo</a>
-                <a href="contacto.html" class="nav-link">Contacto</a>
-            </div>
-            <div class="nav-buttons">
-                <a href="login.html" class="btn-outline">Acceder</a>
-                <a href="compra.html" class="btn-primary">Comenzar</a>
-            </div>
-            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
-        </div>
-    </nav>
+    <nav class="navbar"><div class="container"><div class="nav-brand"><div class="logo-icon"><i class="fas fa-robot"></i></div><span class="logo-text">PORTALPILOT</span><span class="logo-badge">+ CYBERYX</span></div><div class="nav-menu"><a href="index.html" class="nav-link">Inicio</a><a href="features.html" class="nav-link">Características</a><a href="pricing.html" class="nav-link">Planes</a><a href="compra.html" class="nav-link active nav-highlight">Solicitar Demo</a><a href="contacto.html" class="nav-link">Contacto</a></div><div class="nav-buttons"><a href="login.html" class="btn-outline">Acceder</a><a href="compra.html" class="btn-primary">Comenzar</a></div><div class="menu-toggle"><i class="fas fa-bars"></i></div></div></nav>
 
-    <section class="form-section">
-        <div class="container">
-            <div class="form-container">
-                <div class="form-header">
-                    <h1>Solicita tu Demo Gratis</h1>
-                    <p>Completa el formulario y nuestro equipo te contactará en 24 horas</p>
-                </div>
-                
-                <div id="formContent" class="form-body">
-                    <form id="solicitudForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>NOMBRE DE LA EMPRESA *</label>
-                                <input type="text" id="empresaNombre" required placeholder="Ej: Tech Solutions S.A.">
-                            </div>
-                            <div class="form-group">
-                                <label>SECTOR / INDUSTRIA</label>
-                                <select id="sector">
-                                    <option value="">Selecciona</option>
-                                    <option>Tecnología</option>
-                                    <option>Logística</option>
-                                    <option>Retail</option>
-                                    <option>Salud</option>
-                                    <option>Finanzas</option>
-                                    <option>Otro</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>NOMBRE DEL CONTACTO *</label>
-                                <input type="text" id="contactoNombre" required placeholder="Nombre completo">
-                            </div>
-                            <div class="form-group">
-                                <label>CARGO / PUESTO</label>
-                                <input type="text" id="cargo" placeholder="Ej: Gerente de TI">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>CORREO ELECTRÓNICO *</label>
-                                <input type="email" id="email" required placeholder="contacto@empresa.com">
-                            </div>
-                            <div class="form-group">
-                                <label>TELÉFONO / WHATSAPP</label>
-                                <input type="tel" id="telefono" placeholder="+504 XXXX-XXXX">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>PLAN DE INTERÉS</label>
-                            <select id="planInteres">
-                                <option value="free">Free (Gratuito - Hasta 5 usuarios)</option>
-                                <option value="pro" selected>Pro (L.1,500/mes - Hasta 50 usuarios)</option>
-                                <option value="enterprise">Enterprise (Personalizado - Ilimitado)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>NÚMERO DE EMPLEADOS QUE USARÁN EL SISTEMA</label>
-                            <select id="numEmpleados">
-                                <option>1-5</option>
-                                <option>6-20</option>
-                                <option>21-50</option>
-                                <option>51-100</option>
-                                <option>100+</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>¿QUÉ NECESITAS AUTOMATIZAR? *</label>
-                            <textarea id="necesidades" rows="4" placeholder="Describe qué procesos te gustaría automatizar con PortalPilot..." required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>¿CÓMO NOS CONOCISTE?</label>
-                            <select id="referencia">
-                                <option>Búsqueda en Google</option>
-                                <option>Recomendación</option>
-                                <option>Redes Sociales</option>
-                                <option>Evento / Conferencia</option>
-                                <option>Otro</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn-submit" id="submitBtn">
-                            <i class="fas fa-paper-plane"></i> Enviar Solicitud
-                        </button>
-                    </form>
-                </div>
-
-                <div id="successMessage" class="success-message">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>¡Solicitud Enviada!</h2>
-                    <p>Hemos recibido tu información. En las próximas 24 horas nuestro equipo se pondrá en contacto contigo para activar tu demo.</p>
-                    <p><strong>Código de seguimiento:</strong> <span id="trackingCode"></span></p>
-                    <a href="index.html" class="btn-primary">Volver al Inicio</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <div class="logo-icon"><i class="fas fa-robot"></i></div>
-                    <h3>PORTALPILOT</h3>
-                    <p>Automatización inteligente para empresas modernas.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Producto</h4>
-                    <a href="features.html">Características</a>
-                    <a href="pricing.html">Planes</a>
-                    <a href="#">Seguridad</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Compañía</h4>
-                    <a href="#">Nosotros</a>
-                    <a href="contacto.html">Contacto</a>
-                    <a href="#">Blog</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Legal</h4>
-                    <a href="#">Términos</a>
-                    <a href="#">Privacidad</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 PortalPilot + Cyberyx Vantage. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-
+    <section class="form-section"><div class="container"><div class="form-container glass-card"><div class="form-header"><h1>Solicita tu Demo Gratis</h1><p>Completa el formulario y nuestro equipo te contactará en 24 horas</p></div>
+    <div id="formContent" class="form-body"><form id="solicitudForm"><div class="form-row"><div class="form-group"><label>NOMBRE DE LA EMPRESA *</label><input type="text" id="empresaNombre" required placeholder="Ej: Tech Solutions S.A."></div><div class="form-group"><label>SECTOR / INDUSTRIA</label><select id="sector"><option>Tecnología</option><option>Logística</option><option>Retail</option><option>Salud</option><option>Finanzas</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>NOMBRE DEL CONTACTO *</label><input type="text" id="contactoNombre" required placeholder="Nombre completo"></div><div class="form-group"><label>CARGO</label><input type="text" id="cargo" placeholder="Ej: Gerente de TI"></div></div>
+    <div class="form-row"><div class="form-group"><label>CORREO ELECTRÓNICO *</label><input type="email" id="email" required placeholder="contacto@empresa.com"></div><div class="form-group"><label>TELÉFONO / WHATSAPP</label><input type="tel" id="telefono" placeholder="+504 XXXX-XXXX"></div></div>
+    <div class="form-group"><label>PLAN DE INTERÉS</label><select id="planInteres"><option value="free">Free (Gratuito - Hasta 5 usuarios)</option><option value="pro" selected>Pro (L.1,500/mes - Hasta 50 usuarios)</option><option value="enterprise">Enterprise (Personalizado - Ilimitado)</option></select></div>
+    <div class="form-group"><label>NÚMERO DE EMPLEADOS</label><select id="numEmpleados"><option>1-5</option><option>6-20</option><option>21-50</option><option>51-100</option><option>100+</option></select></div>
+    <div class="form-group"><label>¿QUÉ NECESITAS AUTOMATIZAR? *</label><textarea id="necesidades" rows="4" placeholder="Describe qué procesos te gustaría automatizar..." required></textarea></div>
+    <div class="form-group"><label>¿CÓMO NOS CONOCISTE?</label><select id="referencia"><option>Búsqueda en Google</option><option>Recomendación</option><option>Redes Sociales</option><option>Evento</option></select></div>
+    <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Enviar Solicitud</button></form></div>
+    <div id="successMessage" class="success-message"><i class="fas fa-check-circle"></i><h2>¡Solicitud Enviada!</h2><p>Hemos recibido tu información. En las próximas 24 horas te contactaremos.</p><p><strong>Código de seguimiento:</strong> <span id="trackingCode"></span></p><a href="index.html" class="btn-primary" style="display:inline-block; margin-top:20px;">Volver al Inicio</a></div></div></div></section>
+    <footer class="footer"><p>&copy; 2025 PortalPilot + Cyberyx Vantage. Todos los derechos reservados.</p></footer>
     <script>
-        document.getElementById('solicitudForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Generar código de seguimiento
-            const trackingCode = 'PP-' + Date.now().toString(36).toUpperCase();
-            document.getElementById('trackingCode').textContent = trackingCode;
-            
-            // Guardar en localStorage para que el equipo de PortalPilot lo procese
-            const solicitud = {
-                id: trackingCode,
-                fecha: new Date().toISOString(),
-                empresa: document.getElementById('empresaNombre').value,
-                sector: document.getElementById('sector').value,
-                contacto: document.getElementById('contactoNombre').value,
-                cargo: document.getElementById('cargo').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                plan: document.getElementById('planInteres').value,
-                numEmpleados: document.getElementById('numEmpleados').value,
-                necesidades: document.getElementById('necesidades').value,
-                referencia: document.getElementById('referencia').value,
-                estado: 'pendiente'
-            };
-            
-            // Obtener solicitudes existentes o crear array nuevo
-            let solicitudes = JSON.parse(localStorage.getItem('portal_solicitudes') || '[]');
-            solicitudes.push(solicitud);
-            localStorage.setItem('portal_solicitudes', JSON.stringify(solicitudes));
-            
-            // Mostrar mensaje de éxito
-            document.getElementById('formContent').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
-        });
+        document.getElementById('solicitudForm')?.addEventListener('submit', function(e) { e.preventDefault(); const trackingCode = 'PP-' + Date.now().toString(36).toUpperCase(); document.getElementById('trackingCode').innerText = trackingCode; const solicitud = { id: trackingCode, fecha: new Date().toISOString(), empresa: document.getElementById('empresaNombre').value, sector: document.getElementById('sector').value, contacto: document.getElementById('contactoNombre').value, email: document.getElementById('email').value, plan: document.getElementById('planInteres').value, necesidades: document.getElementById('necesidades').value }; let solicitudes = JSON.parse(localStorage.getItem('portal_solicitudes') || '[]'); solicitudes.push(solicitud); localStorage.setItem('portal_solicitudes', JSON.stringify(solicitudes)); document.getElementById('formContent').style.display = 'none'; document.getElementById('successMessage').style.display = 'block'; });
     </script>
 </body>
 </html>
