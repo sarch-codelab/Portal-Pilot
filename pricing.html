@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes | PortalPilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .pricing-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #0A0E17 0%, #0F1118 100%);
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        .pricing-card {
+            background: #111827;
+            border-radius: 24px;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            padding: 32px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: #0EA5E9;
+        }
+        .pricing-card.popular {
+            border-color: #0EA5E9;
+            position: relative;
+        }
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #0EA5E9, #3B82F6);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pricing-card h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0EA5E9;
+            margin: 20px 0;
+        }
+        .price small {
+            font-size: 14px;
+            color: #718096;
+        }
+        .features-list {
+            list-style: none;
+            margin: 24px 0;
+        }
+        .features-list li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .features-list i {
+            color: #10B981;
+            font-size: 14px;
+        }
+        .btn-plan {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                <span class="logo-text">PORTALPILOT</span>
+                <span class="logo-badge">+ CYBERYX</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="features.html" class="nav-link">Características</a>
+                <a href="pricing.html" class="nav-link active">Planes</a>
+                <a href="compra.html" class="nav-link nav-highlight">Solicitar Demo</a>
+                <a href="contacto.html" class="nav-link">Contacto</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn-outline">Acceder</a>
+                <a href="compra.html" class="btn-primary">Comenzar</a>
+            </div>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Planes <span class="gradient-text">Flexibles</span></h1>
+            <p>Elige el plan que mejor se adapte a las necesidades de tu empresa</p>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <div class="container">
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="price">L.0 <small>/mes</small></div>
+                    <p>Ideal para pruebas y startups</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Hasta 5 usuarios</li>
+                        <li><i class="fas fa-check"></i> 1 empresa</li>
+                        <li><i class="fas fa-check"></i> Automatizaciones básicas</li>
+                        <li><i class="fas fa-check"></i> Auditoría básica</li>
+                        <li><i class="fas fa-check"></i> Soporte por email</li>
+                    </ul>
+                    <a href="compra.html" class="btn-outline btn-plan">Comenzar Gratis</a>
+                </div>
+
+                <div class="pricing-card popular">
+                    <div class="popular-badge">MÁS POPULAR</div>
+                    <h3>Pro</h3>
+                    <div class="price">L.1,500 <small>/mes</small></div>
+                    <p>Para empresas en crecimiento</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Hasta 50 usuarios</li>
+                        <li><i class="fas fa-check"></i> Hasta 5 empresas</li>
+                        <li><i class="fas fa-check"></i> Automatizaciones ilimitadas</li>
+                        <li><i class="fas fa-check"></i> Auditoría avanzada con hash</li>
+                        <li><i class="fas fa-check"></i> Reconocimiento facial</li>
+                        <li><i class="fas fa-check"></i> API acceso</li>
+                        <li><i class="fas fa-check"></i> Soporte prioritario 24/7</li>
+                    </ul>
+                    <a href="compra.html" class="btn-primary btn-plan">Contratar Pro</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">Personalizado</div>
+                    <p>Para grandes corporaciones</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Usuarios ilimitados</li>
+                        <li><i class="fas fa-check"></i> Empresas ilimitadas</li>
+                        <li><i class="fas fa-check"></i> Automatizaciones personalizadas</li>
+                        <li><i class="fas fa-check"></i> On-premise disponible</li>
+                        <li><i class="fas fa-check"></i> SLA garantizado 99.9%</li>
+                        <li><i class="fas fa-check"></i> Gestor de cuenta dedicado</li>
+                        <li><i class="fas fa-check"></i> Entrenamiento incluido</li>
+                    </ul>
+                    <a href="compra.html" class="btn-outline btn-plan">Contactar Ventas</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                    <h3>PORTALPILOT</h3>
+                    <p>Automatización inteligente para empresas modernas.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <a href="features.html">Características</a>
+                    <a href="pricing.html">Planes</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Compañía</h4>
+                    <a href="#">Nosotros</a>
+                    <a href="contacto.html">Contacto</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="#">Términos</a>
+                    <a href="#">Privacidad</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PortalPilot + Cyberyx Vantage. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
