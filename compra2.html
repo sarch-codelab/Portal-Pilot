@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Demo | Portal Pilot Exclusive</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #ffffff;
+            --text-mute: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- UI COMPONENTS --- */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .bar-container { height: 2px; width: 250px; background: rgba(255,255,255,0.05); margin-top: 20px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.2s; }
+        
+        #cursor-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; }
+        #cursor-glow { width: 500px; height: 500px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); position: fixed; pointer-events: none; z-index: 0; transform: translate(-50%, -50%); opacity: 0.4; }
+
+        .navbar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 1100px; padding: 12px 24px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 100px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+        .brand { font-weight: 900; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
+        .brand i { color: var(--accent); }
+
+        /* --- FORM LAYOUT --- */
+        .page-wrapper { padding: 160px 24px 100px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 400px; gap: 60px; }
+
+        .form-main { background: var(--glass); border: 1px solid var(--border); border-radius: 40px; padding: 50px; position: relative; overflow: hidden; }
+        .form-main::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent); opacity: 0.3; }
+
+        .progress-indicator { margin-bottom: 40px; }
+        .progress-bar { height: 2px; width: 100%; background: rgba(255,255,255,0.05); border-radius: 10px; position: relative; }
+        .progress-fill { height: 100%; width: 33%; background: var(--accent); box-shadow: 0 0 10px var(--accent); transition: 0.5s; }
+
+        .form-header h1 { font-size: 38px; font-weight: 900; letter-spacing: -2px; margin-bottom: 10px; }
+        .form-header p { color: var(--text-mute); margin-bottom: 40px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+
+        .field { margin-bottom: 25px; }
+        .field label { display: block; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; }
+        .field input, .field select, .field textarea {
+            width: 100%; background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            padding: 16px; border-radius: 15px; color: #fff; font-size: 14px; transition: 0.3s;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: none; border-color: var(--accent); background: rgba(139, 92, 246, 0.05);
+        }
+
+        .btn-submit {
+            width: 100%; padding: 20px; background: var(--accent); color: #fff;
+            border: none; border-radius: 15px; font-weight: 800; cursor: pointer;
+            transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px;
+        }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px var(--accent-glow); }
+
+        /* --- SIDEBAR BENEFITS --- */
+        .side-benefits { display: flex; flex-direction: column; gap: 20px; }
+        .benefit-card { 
+            background: #080808; border: 1px solid var(--border); padding: 30px; border-radius: 25px;
+            transition: 0.3s;
+        }
+        .benefit-card:hover { border-color: var(--accent); transform: translateX(10px); }
+        .benefit-card i { font-size: 24px; color: var(--accent); margin-bottom: 15px; }
+        .benefit-card h4 { margin-bottom: 8px; font-size: 16px; }
+        .benefit-card p { color: var(--text-mute); font-size: 13px; }
+
+        /* --- SUCCESS MESSAGE --- */
+        .success-overlay {
+            display: none; text-align: center; padding: 60px 20px;
+        }
+        .success-overlay i { font-size: 70px; color: #10B981; margin-bottom: 30px; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3)); }
+        .tracking-box { 
+            background: rgba(16, 185, 129, 0.05); border: 1px dashed #10B981; 
+            padding: 20px; border-radius: 15px; font-family: 'Fira Code', monospace; margin: 30px 0;
+        }
+
+        footer { padding: 40px; text-align: center; color: var(--text-mute); font-size: 12px; border-top: 1px solid var(--border); }
+
+        @media (max-width: 1000px) {
+            .page-wrapper { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="brand" style="font-size: 24px;"><i class="fas fa-robot"></i> PORTAL PILOT</div>
+        <div class="bar-container"><div class="bar-fill" id="bar"></div></div>
+    </div>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-glow"></div>
+
+    <nav class="navbar">
+        <div class="brand"><i class="fas fa-robot"></i> PORTAL PILOT</div>
+        <div class="nav-links" style="display:flex; gap:20px;">
+            <a href="index.html" style="color:var(--text-mute); text-decoration:none; font-size:12px;">Inicio</a>
+            <a href="features.html" style="color:var(--text-mute); text-decoration:none; font-size:12px;">Características</a>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+        
+        <main class="form-main">
+            <div id="formContainer">
+                <div class="progress-indicator">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-family:'Fira Code'; margin-bottom:10px; color:var(--accent);">
+                        <span>STEP 01: ANALYTICS</span>
+                        <span id="progText">33% COMPLETE</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
+                </div>
+
+                <div class="form-header">
+                    <h1>Despliegue de Demo</h1>
+                    <p>Configura tu entorno de prueba personalizado en menos de 2 minutos.</p>
+                </div>
+
+                <form id="demoForm">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Organización</label>
+                            <input type="text" id="emp" placeholder="Nombre de la empresa" required oninput="updateProgress()">
+                        </div>
+                        <div class="field">
+                            <label>Sector Industrial</label>
+                            <select id="sec">
+                                <option>Finanzas & Banca</option>
+                                <option>Logística Global</option>
+                                <option>Retail / E-commerce</option>
+                                <option>Health & Pharma</option>
+                                <option>Otro</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Operador Principal</label>
+                            <input type="text" id="nom" placeholder="Tu nombre completo" required oninput="updateProgress()">
+                        </div>
+                        <div class="field">
+                            <label>Email de Enlace</label>
+                            <input type="email" id="mail" placeholder="corp@empresa.com" required oninput="updateProgress()">
+                        </div>
+                        <div class="field full-width">
+                            <label>Protocolo de Interés</label>
+                            <select id="plan">
+                                <option value="pro">Pro VANTAGE (Sugerido)</option>
+                                <option value="ent">Enterprise (Custom Core)</option>
+                                <option value="free">Standard (Límites Básicos)</option>
+                            </select>
+                        </div>
+                        <div class="field full-width">
+                            <label>Misión de Automatización</label>
+                            <textarea id="task" rows="3" placeholder="¿Qué procesos específicos quieres optimizar?" required oninput="updateProgress()"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Iniciar Secuencia de Demo</button>
+                </form>
+            </div>
+
+            <div id="successView" class="success-overlay">
+                <i class="fas fa-microchip"></i>
+                <h2>Sincronización Exitosa</h2>
+                <p>Tu solicitud ha sido procesada por el núcleo Cyberyx. Un analista se pondrá en contacto contigo.</p>
+                <div class="tracking-box">
+                    ID_REQUERIMIENTO: <span id="code" style="color:#fff; font-weight:bold;">---</span>
+                </div>
+                <a href="index.html" style="color:var(--accent); text-decoration:none; font-weight:700; font-size:14px;">[ VOLVER AL TERMINAL PRINCIPAL ]</a>
+            </div>
+        </main>
+
+        <aside class="side-benefits">
+            <div class="benefit-card">
+                <i class="fas fa-bolt"></i>
+                <h4>Setup Express</h4>
+                <p>Instalación del nodo local en menos de 24 horas tras la aprobación.</p>
+            </div>
+            <div class="benefit-card">
+                <i class="fas fa-lock"></i>
+                <h4>Sandbox Seguro</h4>
+                <p>Entorno de prueba aislado para proteger tus datos sensibles reales.</p>
+            </div>
+            <div class="benefit-card">
+                <i class="fas fa-user-astronaut"></i>
+                <h4>Soporte Élite</h4>
+                <p>Acceso directo a ingenieros de automatización durante tu demo.</p>
+            </div>
+            <div style="margin-top:20px; padding:20px; border:1px solid var(--accent); border-radius:20px; opacity:0.6;">
+                <p style="font-size:11px; font-family:'Fira Code'; color:var(--accent);">SISTEMA VANTAGE v3.0<br>STATUS: READY TO DEPLOY</p>
+            </div>
+        </aside>
+
+    </div>
+
+    <footer>
+        &copy; 2026 Portal Pilot + Cyberyx Vantage. Operación bajo protocolos de seguridad AES-256.
+    </footer>
+
+    <script>
+        // Loader & Cursor (Consistencia)
+        window.addEventListener('load', () => {
+            let bar = document.getElementById('bar');
+            let p = 0;
+            let int = setInterval(() => {
+                p += 25;
+                if(p >= 100) { p = 100; clearInterval(int); setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 400); }
+                bar.style.width = p + '%';
+            }, 100);
+        });
+
+        const dot = document.getElementById('cursor-dot');
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px';
+            glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
+        });
+
+        // Form Logic
+        function updateProgress() {
+            const inputs = document.querySelectorAll('#demoForm input[required], #demoForm textarea[required]');
+            let filled = 0;
+            inputs.forEach(i => { if(i.value.length > 0) filled++; });
+            let percent = Math.round((filled / inputs.length) * 100);
+            document.getElementById('fill').style.width = percent + '%';
+            document.getElementById('progText').innerText = percent + '% COMPLETE';
+        }
+
+        document.getElementById('demoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const genCode = 'NODE-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+            document.getElementById('code').innerText = genCode;
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('successView').style.display = 'block';
+            
+            // Efecto de sonido visual o log
+            console.log("Despliegue iniciado para ID: " + genCode);
+        });
+    </script>
+</body>
+</html>
