@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Características | Portal Pilot Exclusive</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #ffffff;
+            --text-mute: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- UI COMPONENTS (Consistencia) --- */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .bar-container { height: 2px; width: 250px; background: rgba(255,255,255,0.05); margin-top: 20px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.2s; }
+        
+        #cursor-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; }
+        #cursor-glow { width: 500px; height: 500px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); position: fixed; pointer-events: none; z-index: 0; transform: translate(-50%, -50%); opacity: 0.4; }
+
+        .navbar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 1100px; padding: 12px 24px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 100px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+        .brand { font-weight: 900; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
+        .brand i { color: var(--accent); }
+        .nav-links a { color: var(--text-mute); text-decoration: none; font-size: 13px; margin: 0 15px; }
+
+        /* --- HEADER --- */
+        .page-header { padding: 180px 24px 80px; text-align: center; }
+        .page-header h1 { 
+            font-size: clamp(40px, 8vw, 75px); font-weight: 900; letter-spacing: -3px; 
+            background: linear-gradient(180deg, #fff 40%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* --- FEATURE BLOCKS --- */
+        .features-container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        
+        .feature-block {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+            margin-bottom: 120px; padding: 40px; border-radius: 40px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+            border: 1px solid var(--border); transition: 0.5s;
+        }
+        .feature-block:hover { border-color: var(--accent); background: rgba(139, 92, 246, 0.03); }
+        .feature-block.reverse { direction: rtl; }
+        .feature-block.reverse .text-side { direction: ltr; }
+
+        .icon-box {
+            width: 100%; aspect-ratio: 1/1; background: #080808; border: 1px solid var(--border);
+            border-radius: 30px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .icon-box i { font-size: 80px; color: var(--accent); filter: drop-shadow(0 0 20px var(--accent-glow)); }
+        
+        /* Efecto decorativo de fondo para los iconos */
+        .icon-box::after {
+            content: ""; position: absolute; width: 150%; height: 150%;
+            background: conic-gradient(from 180deg at 50% 50%, var(--accent) 0deg, transparent 360deg);
+            opacity: 0.1; animation: rotate 10s linear infinite;
+        }
+
+        .text-side span { color: var(--accent); font-weight: 800; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; }
+        .text-side h2 { font-size: 36px; font-weight: 800; margin: 15px 0; letter-spacing: -1px; }
+        .text-side p { color: var(--text-mute); margin-bottom: 25px; font-size: 17px; }
+
+        .feat-pill-list { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; }
+        .feat-pill-list li { 
+            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 100px; 
+            font-size: 13px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+        }
+        .feat-pill-list li i { color: var(--accent); font-size: 10px; }
+
+        /* --- TECH SPECS SECTION --- */
+        .tech-specs { background: #050505; padding: 100px 24px; border-top: 1px solid var(--border); }
+        .specs-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; max-width: 1100px; margin: 40px auto; 
+        }
+        .spec-item { 
+            padding: 30px; border: 1px solid var(--border); border-radius: 20px; 
+            background: #080808; font-family: 'Fira Code', monospace;
+        }
+        .spec-item h4 { color: var(--accent); margin-bottom: 10px; font-size: 14px; }
+        .spec-item p { font-size: 13px; color: #666; }
+
+        footer { padding: 60px 24px; border-top: 1px solid var(--border); text-align: center; color: var(--text-mute); font-size: 13px; }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rvl { opacity: 0; transform: translateY(40px); transition: 0.8s ease-out; }
+        .rvl.active { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .feature-block { grid-template-columns: 1fr; gap: 40px; text-align: center; padding: 20px; }
+            .feature-block.reverse { direction: ltr; }
+            .feat-pill-list { justify-content: center; }
+            .icon-box { aspect-ratio: 16/9; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="brand" style="font-size: 24px;"><i class="fas fa-robot"></i> PORTAL PILOT</div>
+        <div class="bar-container"><div class="bar-fill" id="bar"></div></div>
+    </div>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-glow"></div>
+
+    <nav class="navbar">
+        <div class="brand"><i class="fas fa-robot"></i> PORTAL PILOT</div>
+        <div class="nav-links">
+            <a href="index.html">Inicio</a>
+            <a href="#" style="color:#fff;">Características</a>
+            <a href="pricing.html">Planes</a>
+            <a href="#">Contacto</a>
+        </div>
+        <a href="#" class="btn" style="padding: 8px 20px; font-size: 12px; background:#fff; color:#000; border-radius:100px; text-decoration:none; font-weight:700;">Demo</a>
+    </nav>
+
+    <header class="page-header">
+        <div class="rvl">
+            <span>TECNOLOGÍA VANTAGE</span>
+            <h1>Poder sin <br><span>Límites</span>.</h1>
+            <p>Arquitectura diseñada para la automatización ininterrumpida y la integridad de datos masiva.</p>
+        </div>
+    </header>
+
+    <div class="features-container">
+        
+        <div class="feature-block rvl">
+            <div class="icon-side">
+                <div class="icon-box"><i class="fas fa-brain"></i></div>
+            </div>
+            <div class="text-side">
+                <span>NÚCLEO NEURONAL</span>
+                <h2>Gemma 3N - IA Local</h2>
+                <p>Procesamiento de lenguaje natural y visión computacional que no sale de tus servidores. Privacidad total garantizada por diseño.</p>
+                <ul class="feat-pill-list">
+                    <li><i class="fas fa-circle"></i> 1.5B Parámetros</li>
+                    <li><i class="fas fa-circle"></i> Zero-Latency</li>
+                    <li><i class="fas fa-circle"></i> Offline-First</li>
+                    <li><i class="fas fa-circle"></i> Vision AI</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-block reverse rvl">
+            <div class="icon-side">
+                <div class="icon-box"><i class="fas fa-link"></i></div>
+            </div>
+            <div class="text-side">
+                <span>SEGURIDAD INMUTABLE</span>
+                <h2>Libro Mayor de Auditoría</h2>
+                <p>Cada clic, cada proceso y cada dato extraído queda sellado en una cadena de bloques privada para auditorías forenses instantáneas.</p>
+                <ul class="feat-pill-list">
+                    <li><i class="fas fa-circle"></i> Hash SHA-256</li>
+                    <li><i class="fas fa-circle"></i> Ledger Privado</li>
+                    <li><i class="fas fa-circle"></i> Anti-Tampering</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-block rvl">
+            <div class="icon-side">
+                <div class="icon-box"><i class="fas fa-robot"></i></div>
+            </div>
+            <div class="text-side">
+                <span>AUTOMATIZACIÓN PURA</span>
+                <h2>Agentes Autónomos</h2>
+                <p>Nuestros bots imitan el comportamiento humano con una precisión del 99.9%, permitiendo navegar portales sin APIs disponibles.</p>
+                <ul class="feat-pill-list">
+                    <li><i class="fas fa-circle"></i> DOM Interaction</li>
+                    <li><i class="fas fa-circle"></i> Smart Scheduling</li>
+                    <li><i class="fas fa-circle"></i> Visual Evidence</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <section class="tech-specs rvl">
+        <div class="container" style="max-width:1100px; margin:0 auto; text-align:center;">
+            <h2 style="font-size:32px; margin-bottom:10px;">Especificaciones <span style="color:var(--accent)">Raw</span></h2>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h4>ENCRIPTACIÓN</h4>
+                    <p>AES-256 bits en reposo y TLS 1.3 en tránsito para toda comunicación.</p>
+                </div>
+                <div class="spec-item">
+                    <h4>LATENCIA IA</h4>
+                    <p>< 45ms de tiempo de respuesta en inferencia local (RTX 4090 Opt).</p>
+                </div>
+                <div class="spec-item">
+                    <h4>PROTOCOLOS</h4>
+                    <p>Soporte nativo para SAP, Salesforce y portales gubernamentales legacy.</p>
+                </div>
+                <div class="spec-item">
+                    <h4>SCALABILITY</h4>
+                    <p>Clusterización mediante Kubernetes para despliegues masivos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="brand" style="justify-content:center; margin-bottom:20px; font-size:16px;"><i class="fas fa-robot"></i> PP.</div>
+        <p>&copy; 2026 Portal Pilot + Cyberyx Vantage. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Loader
+        window.addEventListener('load', () => {
+            let bar = document.getElementById('bar');
+            let p = 0;
+            let int = setInterval(() => {
+                p += Math.random() * 30;
+                if(p >= 100) {
+                    p = 100; clearInterval(int);
+                    setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 400);
+                }
+                bar.style.width = p + '%';
+            }, 80);
+        });
+
+        // Cursor
+        const dot = document.getElementById('cursor-dot');
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        // Reveal
+        const obs = new IntersectionObserver((ents) => {
+            ents.forEach(en => { if(en.isIntersecting) en.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.rvl').forEach(r => obs.observe(r));
+    </script>
+</body>
+</html>
