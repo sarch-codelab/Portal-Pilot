@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Seguro | Portal Pilot Exclusive</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #ffffff;
+            --text-mute: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- BACKGROUND EFFECTS --- */
+        .grid-bg {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            opacity: 0.2; z-index: -1;
+        }
+
+        #cursor-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; }
+        #cursor-glow { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); position: fixed; pointer-events: none; z-index: 0; transform: translate(-50%, -50%); opacity: 0.5; }
+
+        /* --- LOGIN PANEL --- */
+        .gateway-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 50px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            animation: panelSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes panelSlide { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .auth-icon-container {
+            position: relative;
+            width: 100px; height: 100px;
+            margin: 0 auto 30px;
+        }
+
+        .auth-icon {
+            width: 100%; height: 100%;
+            background: #080808;
+            border: 1px solid var(--accent);
+            border-radius: 30px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        /* Efecto de escaneo láser */
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            animation: scan 3s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        @keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { top: 90%; opacity: 1; } }
+
+        h1 { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+        .subtitle { color: var(--text-mute); font-size: 14px; margin-bottom: 40px; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+
+        .btn {
+            padding: 18px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            text-decoration: none; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-primary { background: var(--accent); color: #fff; border: none; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--accent-glow); }
+
+        .btn-outline { border: 1px solid var(--border); color: #fff; background: rgba(255,255,255,0.03); }
+        .btn-outline:hover { background: rgba(255,255,255,0.08); border-color: var(--text-mute); }
+
+        /* --- STATUS FOOTER --- */
+        .system-status {
+            margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border);
+            font-family: 'Fira Code', monospace; font-size: 10px;
+        }
+        .status-dot {
+            display: inline-block; width: 8px; height: 8px; background: #10B981;
+            border-radius: 50%; margin-right: 5px; box-shadow: 0 0 8px #10B981;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .info-box {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 15px; padding: 15px; margin-top: 25px;
+            font-size: 12px; color: var(--text-mute); line-height: 1.4;
+        }
+
+        .info-box a { color: var(--accent); text-decoration: none; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-glow"></div>
+
+    <div class="gateway-panel">
+        <div class="auth-icon-container">
+            <div class="scan-line"></div>
+            <div class="auth-icon">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+        </div>
+
+        <h1>ACCESO VANTAGE</h1>
+        <p class="subtitle">Verificación de Nodo Empresarial</p>
+
+        <div class="btn-group">
+            <a href="#" id="launchBtn" class="btn btn-primary">
+                <i class="fas fa-rocket"></i> Abrir Aplicación
+            </a>
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-chevron-left"></i> Volver al Portal
+            </a>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-shield-halved" style="color:var(--accent); margin-bottom: 5px; display:block;"></i>
+            Este acceso requiere la App de Escritorio instalada para mantener el cifrado de extremo a extremo. 
+            ¿Nuevo aquí? <a href="compra.html">Solicita Credenciales</a>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span> 
+            ENLACE CON EL NÚCLEO: <span style="color:#10B981">OPERATIVO</span><br>
+            <span style="opacity:0.5">SSL v3.0 | AES-256 | REGION: HN_SPS</span>
+        </div>
+    </div>
+
+    <script>
+        // Cursor Consistencia
+        const dot = document.getElementById('cursor-dot');
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        // Launch Logic
+        document.getElementById('launchBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            // Simulación de apertura de protocolo personalizado
+            window.location.href = 'portalpilot://auth';
+            
+            const originalText = e.currentTarget.innerHTML;
+            e.currentTarget.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+            
+            setTimeout(() => {
+                alert('PROTOCOLO DE APERTURA: Si PortalPilot no se inicia, verifique su instalación local o contacte a soporte técnico.');
+                e.currentTarget.innerHTML = originalText;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
