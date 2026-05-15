@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Health — Portal Pilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ─── RESET & TOKENS (MISMOS QUE INDEX) ───────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+:root{
+  --bg:       #04040a;
+  --bg2:      #07070f;
+  --bg3:      #0c0c1a;
+  --card:     #0e0e1c;
+  --card2:    #111124;
+  --border:   rgba(139,92,246,0.1);
+  --border2:  rgba(139,92,246,0.22);
+  --accent:   #8b5cf6;
+  --accent2:  #7c3aed;
+  --accent-glow: rgba(139,92,246,0.35);
+  --cyan:     #a78bfa;
+  --white:    #ffffff;
+  --gray:     #5d5d7a;
+  --gray2:    #9ca3af;
+  --text:     #c4c4d4;
+  --green:    #34d399;
+  --red:      #f87171;
+  --yellow:   #fbbf24;
+  --radius:   10px;
+  --radius-lg:18px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow-x:hidden;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;}
+.container{max-width:1400px;margin:0 auto;padding:0 clamp(16px,4vw,40px);}
+
+/* ─── CUSTOM CURSOR ──────────────────────────────────── */
+#cursor-dot{
+  width:6px;height:6px;background:#fff;border-radius:50%;
+  position:fixed;pointer-events:none;z-index:10000;
+  transition:transform 0.1s;
+}
+#cursor-ring{
+  width:36px;height:36px;border:1px solid rgba(139,92,246,0.6);
+  border-radius:50%;position:fixed;pointer-events:none;z-index:9999;
+  transition:transform 0.15s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  transform:translate(-50%,-50%);
+}
+#cursor-glow{
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 70%);
+  position:fixed;pointer-events:none;z-index:0;
+  transform:translate(-50%,-50%);transition:transform 0.08s;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* ─── PROGRESS BAR ──────────────────────────────────── */
+#progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:999;background:transparent;}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));width:0;transition:width .1s linear;}
+
+/* ─── BUTTONS ───────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:40px;font-size:13px;font-weight:600;border:none;transition:all .25s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.btn-acc{background:var(--accent);color:#fff;}
+.btn-acc:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 8px 28px var(--accent-glow);}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid var(--border2);}
+.btn-ghost:hover{background:rgba(139,92,246,0.1);border-color:var(--border2);}
+.btn-white{background:#fff;color:#000;}
+.btn-white:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(255,255,255,0.2);}
+.btn-outline{background:transparent;color:var(--white);border:1px solid var(--border2);}
+.btn-outline:hover{background:rgba(139,92,246,0.08);}
+.btn-danger{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:8px 18px;font-size:12px;}
+.btn-xs{padding:6px 14px;font-size:11px;}
+
+/* ─── DASHBOARD LAYOUT ──────────────────────────────── */
+.dashboard{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+/* ─── SIDEBAR ───────────────────────────────────────── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--border);
+  padding:24px 16px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:8px;z-index:50;
+}
+.sidebar-logo{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  color:var(--white);display:flex;align-items:center;gap:10px;
+  padding:8px 12px;margin-bottom:24px;border-radius:var(--radius);
+}
+.sidebar-logo .logo-icon{
+  width:28px;height:28px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;
+}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+.sidebar-link{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-radius:var(--radius);font-size:13px;font-weight:500;
+  color:var(--gray2);transition:all .2s;
+}
+.sidebar-link:hover,.sidebar-link.active{
+  background:rgba(139,92,246,0.1);color:var(--white);
+}
+.sidebar-link i{width:18px;text-align:center;font-size:14px;}
+.sidebar-link.active{border-left:2px solid var(--accent);padding-left:14px;}
+.sidebar-footer{
+  padding-top:16px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:8px;
+}
+.sidebar-user{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--radius);background:var(--card);
+}
+.sidebar-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:600;
+}
+.sidebar-username{font-size:12px;font-weight:600;color:var(--white);}
+.sidebar-role{font-size:11px;color:var(--gray);}
+
+/* ─── MAIN CONTENT ──────────────────────────────────── */
+.main-content{display:flex;flex-direction:column;gap:0;}
+
+/* ─── TOP BAR ───────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(4,4,10,0.85);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(16px,4vw,40px);height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.topbar-title{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  color:var(--white);
+}
+.topbar-title span{color:var(--accent);}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:40px;padding:8px 16px;width:280px;
+}
+.topbar-search input{
+  background:none;border:none;outline:none;
+  color:var(--text);font-size:13px;width:100%;
+}
+.topbar-search input::placeholder{color:var(--gray);}
+.topbar-search i{color:var(--gray);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:14px;position:relative;
+  transition:all .2s;
+}
+.topbar-btn:hover{background:rgba(139,92,246,0.1);color:var(--accent);border-color:var(--border2);}
+.topbar-btn .badge{
+  position:absolute;top:-4px;right:-4px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--red);color:#fff;font-size:9px;
+  display:flex;align-items:center;justify-content:center;font-weight:600;
+}
+.topbar-status{
+  display:flex;align-items:center;gap:8px;padding:8px 16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:40px;font-size:12px;font-weight:500;
+}
+.topbar-status .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* ─── PAGE HEADER ───────────────────────────────────── */
+.page-header{
+  padding:clamp(24px,4vw,40px) clamp(16px,4vw,40px) 24px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-wrap:wrap;gap:16px;border-bottom:1px solid var(--border);
+}
+.page-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(24px,4vw,32px);font-weight:800;
+  color:var(--white);letter-spacing:-1px;
+}
+.page-title span{color:var(--accent);}
+.page-subtitle{font-size:14px;color:var(--gray);max-width:480px;line-height:1.6;}
+.page-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.page-actions .btn i{animation:spin 2s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* ─── HEALTH GRID ───────────────────────────────────── */
+.health-grid{
+  padding:24px clamp(16px,4vw,40px);
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:20px;
+}
+
+/* ─── MONITOR CARD ──────────────────────────────────── */
+.monitor-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.monitor-card.full{grid-column:span 2;}
+.monitor-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--card2);
+}
+.monitor-title{
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  color:var(--white);display:flex;align-items:center;gap:10px;
+}
+.monitor-title i{color:var(--accent);}
+.monitor-status{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;padding:6px 12px;
+  border-radius:20px;
+}
+.monitor-status.healthy{background:rgba(52,211,153,0.15);color:var(--green);}
+.monitor-status.warning{background:rgba(251,191,36,0.15);color:var(--yellow);}
+.monitor-status.critical{background:rgba(248,113,113,0.15);color:var(--red);}
+.monitor-status .dot{
+  width:8px;height:8px;border-radius:50%;margin-right:4px;
+}
+.monitor-status.healthy .dot{background:var(--green);}
+.monitor-status.warning .dot{background:var(--yellow);}
+.monitor-status.critical .dot{background:var(--red);}
+
+.monitor-body{padding:20px;flex:1;}
+
+/* ─── AI MONITOR STYLES ─────────────────────────────── */
+.ai-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;}
+.ai-stat{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+}
+.ai-stat-label{font-size:11px;color:var(--gray);margin-bottom:6px;}
+.ai-stat-value{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  color:var(--white);
+}
+.ai-stat-value span{font-size:12px;font-weight:400;color:var(--gray);margin-left:4px;}
+
+.ai-progress{margin-bottom:16px;}
+.ai-progress-label{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--gray);margin-bottom:6px;
+}
+.ai-progress-bar{
+  height:8px;background:var(--card2);border-radius:4px;
+  overflow:hidden;position:relative;
+}
+.ai-progress-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width .5s ease;position:relative;
+}
+.ai-progress-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:2px;
+  background:#fff;box-shadow:0 0 10px #fff;
+}
+
+.ai-queue{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+}
+.queue-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.queue-title{font-size:12px;font-weight:600;color:var(--white);}
+.queue-count{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  color:var(--accent);
+}
+.queue-items{display:flex;flex-direction:column;gap:8px;}
+.queue-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 12px;background:var(--card);border-radius:6px;
+  font-size:12px;
+}
+.queue-item .tenant{color:var(--white);font-weight:500;}
+.queue-item .action{color:var(--gray);}
+.queue-item .time{color:var(--gray2);font-size:10px;}
+
+/* ─── DB MONITOR STYLES ─────────────────────────────── */
+.db-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.db-stat{
+  text-align:center;padding:12px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.db-stat-value{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  color:var(--accent);margin-bottom:4px;
+}
+.db-stat-label{font-size:11px;color:var(--gray);}
+
+.tables-list{display:flex;flex-direction:column;gap:10px;max-height:180px;overflow-y:auto;}
+.table-row{
+  display:grid;grid-template-columns:1fr auto auto;
+  gap:12px;align-items:center;padding:10px 12px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;font-size:12px;
+}
+.table-name{color:var(--white);font-weight:500;}
+.table-rows{color:var(--gray2);}
+.table-size{
+  padding:2px 8px;border-radius:4px;
+  background:rgba(139,92,246,0.15);color:var(--cyan);
+  font-weight:500;
+}
+
+.migrations-list{display:flex;flex-direction:column;gap:10px;}
+.migration-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:10px;border-radius:8px;
+  background:var(--card2);border-left:3px solid var(--border);
+}
+.migration-item.success{border-left-color:var(--green);}
+.migration-item.pending{border-left-color:var(--yellow);}
+.migration-icon{
+  width:24px;height:24px;border-radius:6px;
+  background:rgba(139,92,246,0.15);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;flex-shrink:0;
+}
+.migration-item.success .migration-icon{background:rgba(52,211,153,0.15);color:var(--green);}
+.migration-content{flex:1;}
+.migration-name{font-size:12px;font-weight:500;color:var(--white);margin-bottom:4px;}
+.migration-meta{font-size:10px;color:var(--gray);display:flex;gap:12px;}
+
+/* ─── LOGS CONSOLE STYLES ───────────────────────────── */
+.logs-console{
+  background:#0a0a14;border:1px solid var(--border);
+  border-radius:var(--radius);font-family:'Courier New',monospace;
+  font-size:12px;line-height:1.6;max-height:300px;
+  overflow-y:auto;padding:14px;
+}
+.log-entry{display:flex;gap:12px;padding:4px 0;border-bottom:1px dashed rgba(139,92,246,0.1);}
+.log-entry:last-child{border-bottom:none;}
+.log-time{color:var(--gray2);font-size:10px;min-width:70px;}
+.log-level{
+  padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;
+  text-transform:uppercase;min-width:60px;text-align:center;
+}
+.log-level.info{background:rgba(167,139,250,0.2);color:var(--cyan);}
+.log-level.warn{background:rgba(251,191,36,0.2);color:var(--yellow);}
+.log-level.error{background:rgba(248,113,113,0.2);color:var(--red);}
+.log-level.success{background:rgba(52,211,153,0.2);color:var(--green);}
+.log-message{color:var(--text);flex:1;word-break:break-word;}
+.log-source{color:var(--gray);font-size:10px;}
+
+.logs-controls{
+  display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;
+}
+.logs-filter{
+  padding:6px 12px;border-radius:6px;
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--gray2);font-size:11px;cursor:pointer;
+  transition:all .2s;
+}
+.logs-filter:hover,.logs-filter.active{
+  background:rgba(139,92,246,0.15);color:var(--white);border-color:var(--border2);
+}
+.logs-actions{margin-left:auto;display:flex;gap:8px;}
+
+/* ─── BLOCKCHAIN AUDIT STYLES ───────────────────────── */
+.chain-visualizer{
+  display:flex;flex-direction:column;gap:16px;
+}
+.chain-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.chain-integrity{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;
+}
+.chain-integrity.valid{color:var(--green);}
+.chain-integrity.broken{color:var(--red);}
+.chain-integrity i{font-size:16px;}
+
+.chain-list{display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;}
+.chain-block{
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:14px;align-items:center;padding:14px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius);position:relative;
+}
+.chain-block::before{
+  content:'';position:absolute;left:20px;top:100%;width:2px;height:10px;
+  background:var(--border);
+}
+.chain-block:last-child::before{display:none;}
+.block-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+}
+.block-content{min-width:0;}
+.block-hash{
+  font-family:monospace;font-size:11px;color:var(--cyan);
+  word-break:break-all;margin-bottom:4px;
+}
+.block-meta{
+  display:flex;gap:12px;font-size:10px;color:var(--gray);
+}
+.block-actions{display:flex;gap:6px;}
+.block-btn{
+  width:28px;height:28px;border-radius:6px;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:11px;cursor:pointer;
+  transition:all .2s;
+}
+.block-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.block-btn.verify{color:var(--green);border-color:rgba(52,211,153,0.3);}
+.block-btn.verify:hover{background:var(--green);color:#fff;}
+.block-btn.invalid{border-color:var(--red);color:var(--red);}
+.block-btn.invalid:hover{background:var(--red);color:#fff;}
+
+.chain-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:12px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--gray);
+}
+
+/* ─── SYSTEM METRICS BAR ────────────────────────────── */
+.metrics-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:12px;padding:12px clamp(16px,4vw,40px);
+  background:var(--bg2);border-top:1px solid var(--border);
+}
+.metric-mini{
+  display:flex;flex-direction:column;gap:4px;
+  padding:10px;border-radius:var(--radius);
+  background:var(--card);border:1px solid var(--border);
+}
+.metric-mini-label{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;}
+.metric-mini-value{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  color:var(--white);display:flex;align-items:center;gap:6px;
+}
+.metric-mini-value .trend{font-size:10px;font-weight:400;}
+.metric-mini-value .trend.up{color:var(--green);}
+.metric-mini-value .trend.down{color:var(--red);}
+.metric-mini-bar{
+  height:4px;background:var(--card2);border-radius:2px;
+  overflow:hidden;
+}
+.metric-mini-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width .3s ease;
+}
+
+/* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:1200px){
+  .health-grid{grid-template-columns:1fr;}
+  .monitor-card.full{grid-column:span 1;}
+  .ai-stats{grid-template-columns:1fr;}
+  .db-overview{grid-template-columns:repeat(2,1fr);}
+  .metrics-bar{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  .dashboard{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:-240px;top:0;width:240px;transition:left .3s;z-index:100;}
+  .sidebar.open{left:0;}
+  .sidebar-toggle{display:flex !important;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+  .db-overview{grid-template-columns:1fr;}
+  .metrics-bar{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .chain-block{grid-template-columns:1fr;gap:10px;}
+  .block-num{align-self:flex-start;}
+  .block-actions{justify-content:flex-end;}
+  .logs-console{font-size:11px;}
+}
+
+/* ─── SIDEBAR TOGGLE (MOBILE) ───────────────────────── */
+.sidebar-toggle{
+  display:none;position:fixed;top:16px;left:16px;z-index:60;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  align-items:center;justify-content:center;
+  color:var(--white);font-size:16px;
+}
+
+/* ─── REFRESH ANIMATION ─────────────────────────────── */
+@keyframes refreshSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.refreshing i{animation:refreshSpin 1s linear infinite;}
+
+/* ─── BLINK FOR LIVE INDICATOR ──────────────────────── */
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-indicator{color:var(--green);animation:blink 1.5s infinite;}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div id="progress"><div id="progress-fill"></div></div>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div id="cursor-glow"></div>
+
+<!-- SIDEBAR TOGGLE (MOBILE) -->
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-robot"></i></div>
+      PORTAL PILOT
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="tenants.html" class="sidebar-link">
+        <i class="fas fa-building"></i> Tenants
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-users"></i> Usuarios
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-robot"></i> Bots RPA
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-link"></i> Auditoría
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-chart-line"></i> Analytics
+      </a>
+      <a href="system_health.html" class="sidebar-link active">
+        <i class="fas fa-heartbeat"></i> System Health
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-cog"></i> Configuración
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-question-circle"></i> Ayuda
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </a>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">DEV</div>
+        <div>
+          <div class="sidebar-username">DevOps Admin</div>
+          <div class="sidebar-role">Root Access</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Monitoría <span>Técnica</span></div>
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar logs, métricas, servicios...">
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-status">
+          <span class="dot"></span>
+          Todos los sistemas operativos
+        </div>
+        <button class="topbar-btn" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="badge">1</span>
+        </button>
+        <button class="btn btn-acc btn-sm" onclick="refreshAll()" id="refreshBtn">
+          <i class="fas fa-sync-alt"></i> Actualizar
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Estado de <span>Infraestructura</span></h1>
+        <p class="page-subtitle">Panel exclusivo para desarrolladores. Monitoriza en tiempo real el estado de Ollama, NocoDB, logs del sistema y la integridad de la cadena blockchain.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportMetrics()">
+          <i class="fas fa-download"></i> Exportar Métricas
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAutoRefresh()">
+          <i class="fas fa-clock"></i> Auto-refresh: <span id="autoRefreshStatus">ON</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- HEALTH GRID -->
+    <div class="health-grid">
+      
+      <!-- AI MONITOR -->
+      <div class="monitor-card reveal">
+        <div class="monitor-header">
+          <div class="monitor-title">
+            <i class="fas fa-brain"></i>
+            Monitor de IA — Ollama
+          </div>
+          <div class="monitor-status healthy" id="aiStatus">
+            <span class="dot"></span>
+            Healthy
+          </div>
+        </div>
+        <div class="monitor-body">
+          <div class="ai-stats">
+            <div class="ai-stat">
+              <div class="ai-stat-label">Modelo Cargado</div>
+              <div class="ai-stat-value">Gemma 3N <span>7B</span></div>
+            </div>
+            <div class="ai-stat">
+              <div class="ai-stat-label">Tiempo de Respuesta</div>
+              <div class="ai-stat-value">142 <span>ms</span></div>
+            </div>
+            <div class="ai-stat">
+              <div class="ai-stat-label">Requests/min</div>
+              <div class="ai-stat-value">847 <span>avg</span></div>
+            </div>
+            <div class="ai-stat">
+              <div class="ai-stat-label">Error Rate</div>
+              <div class="ai-stat-value">0.02 <span>%</span></div>
+            </div>
+          </div>
+          
+          <div class="ai-progress">
+            <div class="ai-progress-label">
+              <span>VRAM Usage</span>
+              <span id="vramValue">18.4 / 24 GB</span>
+            </div>
+            <div class="ai-progress-bar">
+              <div class="ai-progress-fill" id="vramFill" style="width:77%"></div>
+            </div>
+          </div>
+          
+          <div class="ai-progress">
+            <div class="ai-progress-label">
+              <span>RAM Usage</span>
+              <span id="ramValue">32.1 / 64 GB</span>
+            </div>
+            <div class="ai-progress-bar">
+              <div class="ai-progress-fill" id="ramFill" style="width:50%;background:linear-gradient(90deg,var(--cyan),var(--accent))"></div>
+            </div>
+          </div>
+          
+          <div class="ai-queue">
+            <div class="queue-header">
+              <span class="queue-title">Cola de Peticiones</span>
+              <span class="queue-count" id="queueCount">23</span>
+            </div>
+            <div class="queue-items">
+              <div class="queue-item">
+                <span class="tenant">TechCorp</span>
+                <span class="action">Análisis proveedores</span>
+                <span class="time">2s</span>
+              </div>
+              <div class="queue-item">
+                <span class="tenant">HealthSys</span>
+                <span class="action">Validación documentos</span>
+                <span class="time">5s</span>
+              </div>
+              <div class="queue-item">
+                <span class="tenant">FinanceLab</span>
+                <span class="action">Generación reporte</span>
+                <span class="time">12s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATABASE MONITOR -->
+      <div class="monitor-card reveal" style="transition-delay:.1s;">
+        <div class="monitor-header">
+          <div class="monitor-title">
+            <i class="fas fa-database"></i>
+            Base de Datos — NocoDB
+          </div>
+          <div class="monitor-status healthy" id="dbStatus">
+            <span class="dot"></span>
+            Healthy
+          </div>
+        </div>
+        <div class="monitor-body">
+          <div class="db-overview">
+            <div class="db-stat">
+              <div class="db-stat-value">12.4 GB</div>
+              <div class="db-stat-label">Tamaño Total</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-value">847</div>
+              <div class="db-stat-label">Conexiones Activas</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-value">23 ms</div>
+              <div class="db-stat-label">Latencia Promedio</div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:10px;">Tablas Principales</div>
+            <div class="tables-list">
+              <div class="table-row">
+                <span class="table-name">tenants</span>
+                <span class="table-rows">523 rows</span>
+                <span class="table-size">2.1 GB</span>
+              </div>
+              <div class="table-row">
+                <span class="table-name">users</span>
+                <span class="table-rows">2,847 rows</span>
+                <span class="table-size">456 MB</span>
+              </div>
+              <div class="table-row">
+                <span class="table-name">audit_logs</span>
+                <span class="table-rows">184K rows</span>
+                <span class="table-size">8.2 GB</span>
+              </div>
+              <div class="table-row">
+                <span class="table-name">blockchain_hashes</span>
+                <span class="table-rows">912K rows</span>
+                <span class="table-size">1.6 GB</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+              <span>Últimas Migraciones</span>
+              <button class="btn btn-ghost btn-xs" onclick="runMigrationTest()">Test Migration</button>
+            </div>
+            <div class="migrations-list">
+              <div class="migration-item success">
+                <div class="migration-icon"><i class="fas fa-check"></i></div>
+                <div class="migration-content">
+                  <div class="migration-name">Add blockchain_verification_index</div>
+                  <div class="migration-meta">
+                    <span><i class="fas fa-clock"></i> Hace 2h</span>
+                    <span><i class="fas fa-user"></i> deploy-bot</span>
+                  </div>
+                </div>
+              </div>
+              <div class="migration-item success">
+                <div class="migration-icon"><i class="fas fa-check"></i></div>
+                <div class="migration-content">
+                  <div class="migration-name">Optimize audit_logs partitioning</div>
+                  <div class="migration-meta">
+                    <span><i class="fas fa-clock"></i> Hace 1d</span>
+                    <span><i class="fas fa-user"></i> admin</span>
+                  </div>
+                </div>
+              </div>
+              <div class="migration-item pending">
+                <div class="migration-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="migration-content">
+                  <div class="migration-name">Add cyberyx_biometric_fields</div>
+                  <div class="migration-meta">
+                    <span><i class="fas fa-clock"></i> Pendiente</span>
+                    <span><i class="fas fa-user"></i> staging</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE LOGS CONSOLE -->
+      <div class="monitor-card full reveal">
+        <div class="monitor-header">
+          <div class="monitor-title">
+            <i class="fas fa-terminal"></i>
+            Logs en Vivo del Sistema
+          </div>
+          <div class="monitor-status warning">
+            <span class="dot"></span>
+            <span class="live-indicator">● LIVE</span>
+          </div>
+        </div>
+        <div class="monitor-body">
+          <div class="logs-controls">
+            <button class="logs-filter active" data-level="all" onclick="filterLogs('all')">Todos</button>
+            <button class="logs-filter" data-level="info" onclick="filterLogs('info')">Info</button>
+            <button class="logs-filter" data-level="warn" onclick="filterLogs('warn')">Warning</button>
+            <button class="logs-filter" data-level="error" onclick="filterLogs('error')">Error</button>
+            <button class="logs-filter" data-level="success" onclick="filterLogs('success')">Success</button>
+            <div class="logs-actions">
+              <button class="btn btn-ghost btn-xs" onclick="clearLogs()"><i class="fas fa-trash"></i> Limpiar</button>
+              <button class="btn btn-ghost btn-xs" onclick="downloadLogs()"><i class="fas fa-download"></i> Descargar</button>
+            </div>
+          </div>
+          <div class="logs-console" id="logsConsole">
+            <!-- Logs populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCKCHAIN AUDIT -->
+      <div class="monitor-card full reveal">
+        <div class="monitor-header">
+          <div class="monitor-title">
+            <i class="fas fa-link"></i>
+            Auditoría Blockchain — Verificador de Integridad
+          </div>
+          <div class="monitor-status healthy" id="chainStatus">
+            <span class="dot"></span>
+            Cadena Íntegra
+          </div>
+        </div>
+        <div class="monitor-body">
+          <div class="chain-visualizer">
+            <div class="chain-header">
+              <div style="font-size:12px;color:var(--gray);">
+                Últimos <strong style="color:var(--white);">10 bloques</strong> de la cadena de auditoría
+              </div>
+              <div class="chain-integrity valid" id="chainIntegrity">
+                <i class="fas fa-shield-check"></i>
+                Todos los hashes verificados ✓
+              </div>
+            </div>
+            
+            <div class="chain-list" id="chainList">
+              <!-- Chain blocks populated by JS -->
+            </div>
+            
+            <div class="chain-footer">
+              <span>
+                <i class="fas fa-cube"></i> Bloque actual: <strong style="color:var(--white);">#912,847</strong>
+              </span>
+              <span>
+                <button class="btn btn-ghost btn-xs" onclick="verifyChain()"><i class="fas fa-search"></i> Verificar Cadena Completa</button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SYSTEM METRICS BAR -->
+    <div class="metrics-bar">
+      <div class="metric-mini">
+        <span class="metric-mini-label">CPU Cluster</span>
+        <div class="metric-mini-value">
+          67% <span class="trend up"><i class="fas fa-arrow-up"></i> +3%</span>
+        </div>
+        <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:67%"></div></div>
+      </div>
+      <div class="metric-mini">
+        <span class="metric-mini-label">GPU Nodes</span>
+        <div class="metric-mini-value">
+          4/4 <span class="trend" style="color:var(--green);">OK</span>
+        </div>
+        <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="metric-mini">
+        <span class="metric-mini-label">Network I/O</span>
+        <div class="metric-mini-value">
+          234 MB/s <span class="trend down"><i class="fas fa-arrow-down"></i> -12%</span>
+        </div>
+        <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:45%"></div></div>
+      </div>
+      <div class="metric-mini">
+        <span class="metric-mini-label">Disk Usage</span>
+        <div class="metric-mini-value">
+          58% <span class="trend" style="color:var(--gray2);">Estable</span>
+        </div>
+        <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:58%;background:linear-gradient(90deg,var(--cyan),var(--yellow))"></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Custom Cursor (MISMO QUE INDEX) ───────────────────
+const dot=document.getElementById('cursor-dot');
+const ring=document.getElementById('cursor-ring');
+const glow=document.getElementById('cursor-glow');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  glow.style.left=mx+'px';glow.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.sidebar-link,.logs-filter,.block-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    ring.style.width='50px';ring.style.height='50px';ring.style.opacity='.5';
+  });
+  el.addEventListener('mouseleave',()=>{
+    ring.style.width='36px';ring.style.height='36px';ring.style.opacity='1';
+  });
+});
+
+// ── Scroll Progress ──────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const p=(window.scrollY/(document.documentElement.scrollHeight-innerHeight))*100;
+  document.getElementById('progress-fill').style.width=p+'%';
+});
+
+// ── Reveal on Scroll ─────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting)setTimeout(()=>e.target.classList.add('in'),i*50);
+  });
+},{threshold:0.05});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Sidebar Toggle (Mobile) ──────────────────────────
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  const sidebar=document.getElementById('sidebar');
+  const toggle=document.getElementById('sidebarToggle');
+  if(window.innerWidth<=900 && sidebar.classList.contains('open') && 
+     !sidebar.contains(e.target) && !toggle.contains(e.target)){
+    sidebar.classList.remove('open');
+  }
+});
+
+// ── Sample Log Data ──────────────────────────────────
+const logEntries=[
+  {time:'14:32:18',level:'info',source:'ollama-api',message:'Request processed: tenant=TechCorp, action=analyze_suppliers, duration=142ms'},
+  {time:'14:32:15',level:'success',source:'blockchain',message:'Hash verified: 0x8f2a...b9e3 — Chain integrity maintained'},
+  {time:'14:32:10',level:'warn',source:'db-pool',message:'Connection pool at 85% capacity — Consider scaling'},
+  {time:'14:32:05',level:'info',source:'rpa-bot',message:'Bot execution started: tenant=HealthSys, task=document_validation'},
+  {time:'14:31:58',level:'error',source:'auth-service',message:'Failed login attempt: IP=185.220.101.42, tenant=FinanceLab'},
+  {time:'14:31:45',level:'info',source:'cyberyx',message:'Biometric verification successful: user=ana.martinez@techcorp.io'},
+  {time:'14:31:30',level:'warn',source:'gpu-monitor',message:'GPU node-03 temperature at 78°C — Monitoring'},
+  {time:'14:31:15',level:'success',source:'migration',message:'Migration completed: add_blockchain_verification_index (2.3s)'},
+  {time:'14:31:00',level:'info',source:'api-gateway',message:'Rate limit applied: tenant=RetailPlus, endpoint=/api/v1/bots'},
+  {time:'14:30:42',level:'error',source:'file-processor',message:'Timeout processing attachment: file=report_Q4.pdf, tenant=LogiSoft'}
+];
+
+// ── Render Logs ──────────────────────────────────────
+function renderLogs(filter='all'){
+  const console=document.getElementById('logsConsole');
+  console.innerHTML='';
+  
+  const filtered=filter==='all'?logEntries:logEntries.filter(l=>l.level===filter);
+  
+  filtered.forEach(log=>{
+    const entry=document.createElement('div');
+    entry.className='log-entry';
+    entry.innerHTML=`
+      <span class="log-time">${log.time}</span>
+      <span class="log-level ${log.level}">${log.level}</span>
+      <span class="log-message">${log.message}</span>
+      <span class="log-source">[${log.source}]</span>
+    `;
+    console.appendChild(entry);
+  });
+  
+  // Auto-scroll to bottom
+  console.scrollTop=console.scrollHeight;
+}
+
+// ── Filter Logs ──────────────────────────────────────
+function filterLogs(level){
+  document.querySelectorAll('.logs-filter').forEach(btn=>btn.classList.remove('active'));
+  document.querySelector(`.logs-filter[data-level="${level}"]`).classList.add('active');
+  renderLogs(level);
+}
+
+function clearLogs(){
+  document.getElementById('logsConsole').innerHTML='<div style="color:var(--gray);text-align:center;padding:20px;">Logs limpiados. Esperando nuevos eventos...</div>';
+}
+
+function downloadLogs(){
+  const content=logEntries.map(l=>`[${l.time}] [${l.level.toUpperCase()}] [${l.source}] ${l.message}`).join('\n');
+  const blob=new Blob([content],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`system_logs_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+// ── Blockchain Chain Data ────────────────────────────
+const chainBlocks=[
+  {num:912847,hash:'0x8f2a9b1c4e5d6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a',prev:'0x7e1a8b0c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',timestamp:'14:32:15',verified:true},
+  {num:912846,hash:'0x7e1a8b0c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',prev:'0x6d0a7b9c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9',timestamp:'14:31:42',verified:true},
+  {num:912845,hash:'0x6d0a7b9c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9',prev:'0x5c9a6b8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8',timestamp:'14:31:08',verified:true},
+  {num:912844,hash:'0x5c9a6b8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8',prev:'0x4b8a5b7c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7',timestamp:'14:30:35',verified:true},
+  {num:912843,hash:'0x4b8a5b7c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7',prev:'0x3a7a4b6c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6',timestamp:'14:30:01',verified:true},
+  {num:912842,hash:'0x3a7a4b6c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6',prev:'0x2969a3b5c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5',timestamp:'14:29:28',verified:true},
+  {num:912841,hash:'0x2969a3b5c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5',prev:'0x1858a2b4c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4',timestamp:'14:28:54',verified:true},
+  {num:912840,hash:'0x1858a2b4c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4',prev:'0x0747a1b3c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3',timestamp:'14:28:21',verified:true},
+  {num:912839,hash:'0x0747a1b3c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3',prev:'0xf636a0b2c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2',timestamp:'14:27:47',verified:true},
+  {num:912838,hash:'0xf636a0b2c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2',prev:'0xe5259fb1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1',timestamp:'14:27:14',verified:true}
+];
+
+// ── Render Blockchain ────────────────────────────────
+function renderChain(){
+  const list=document.getElementById('chainList');
+  list.innerHTML='';
+  
+  chainBlocks.forEach(block=>{
+    const item=document.createElement('div');
+    item.className='chain-block';
+    item.innerHTML=`
+      <div class="block-num">#${block.num.toLocaleString()}</div>
+      <div class="block-content">
+        <div class="block-hash">${block.hash}</div>
+        <div class="block-meta">
+          <span><i class="fas fa-link"></i> Prev: ${block.prev.slice(0,12)}...</span>
+          <span><i class="fas fa-clock"></i> ${block.timestamp}</span>
+        </div>
+      </div>
+      <div class="block-actions">
+        <button class="block-btn ${block.verified?'verify':'invalid'}" onclick="verifyBlock('${block.hash}')" title="${block.verified?'Verificado':'No verificado'}">
+          <i class="fas fa-${block.verified?'check':'exclamation'}"></i>
+        </button>
+        <button class="block-btn" onclick="copyHash('${block.hash}')" title="Copiar hash"><i class="fas fa-copy"></i></button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function verifyBlock(hash){
+  // Simulate verification
+  const btn=event.currentTarget;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+  setTimeout(()=>{
+    btn.innerHTML='<i class="fas fa-check"></i>';
+    btn.classList.add('verify');
+    btn.classList.remove('invalid');
+  },800);
+}
+
+function copyHash(hash){
+  navigator.clipboard.writeText(hash);
+  // Visual feedback
+  const btn=event.currentTarget;
+  const orig=btn.innerHTML;
+  btn.innerHTML='<i class="fas fa-check"></i>';
+  setTimeout(()=>btn.innerHTML=orig,1500);
+}
+
+function verifyChain(){
+  const btn=event.currentTarget;
+  const orig=btn.innerHTML;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Verificando...';
+  btn.disabled=true;
+  
+  setTimeout(()=>{
+    btn.innerHTML=orig;
+    btn.disabled=false;
+    document.getElementById('chainIntegrity').innerHTML='<i class="fas fa-shield-check"></i> Cadena verificada: 10/10 bloques íntegros ✓';
+    document.getElementById('chainIntegrity').className='chain-integrity valid';
+    alert('✓ Verificación completada: Todos los hashes son válidos y la cadena está intacta.');
+  },2000);
+}
+
+// ── AI Monitor Live Updates ──────────────────────────
+function updateAIMetrics(){
+  // Simulate live VRAM updates
+  const vram=70+Math.random()*15;
+  document.getElementById('vramFill').style.width=vram+'%';
+  document.getElementById('vramValue').textContent=`${(vram*24/100).toFixed(1)} / 24 GB`;
+  
+  // Simulate queue updates
+  const queue=Math.floor(15+Math.random()*30);
+  document.getElementById('queueCount').textContent=queue;
+  
+  // Randomly update status
+  if(Math.random()>0.95){
+    const statuses=['healthy','warning','critical'];
+    const status=statuses[Math.floor(Math.random()*statuses.length)];
+    const el=document.getElementById('aiStatus');
+    el.className=`monitor-status ${status}`;
+    el.innerHTML=`<span class="dot"></span>${status.charAt(0).toUpperCase()+status.slice(1)}`;
+  }
+}
+
+// ── Refresh Functions ────────────────────────────────
+let autoRefresh=true;
+let refreshInterval;
+
+function refreshAll(){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('refreshing');
+  
+  // Simulate API calls
+  setTimeout(()=>{
+    updateAIMetrics();
+    renderLogs(document.querySelector('.logs-filter.active').dataset.level);
+    renderChain();
+    btn.classList.remove('refreshing');
+    
+    // Show toast
+    showToast('✓ Métricas actualizadas');
+  },800);
+}
+
+function toggleAutoRefresh(){
+  autoRefresh=!autoRefresh;
+  document.getElementById('autoRefreshStatus').textContent=autoRefresh?'ON':'OFF';
+  
+  if(autoRefresh){
+    refreshInterval=setInterval(refreshAll,30000);
+    showToast('● Auto-refresh activado (30s)');
+  }else{
+    clearInterval(refreshInterval);
+    showToast('○ Auto-refresh desactivado');
+  }
+}
+
+function showToast(message){
+  const toast=document.createElement('div');
+  toast.style.cssText=`
+    position:fixed;bottom:24px;right:24px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:12px 20px;
+    font-size:13px;color:var(--white);z-index:1000;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    animation:slideIn .3s ease;
+  `;
+  toast.innerHTML=`<i class="fas fa-check-circle" style="color:var(--green);margin-right:8px;"></i>${message}`;
+  document.body.appendChild(toast);
+  setTimeout(()=>{
+    toast.style.animation='slideOut .3s ease';
+    setTimeout(()=>toast.remove(),300);
+  },2500);
+}
+
+// Add keyframe animations for toast
+const style=document.createElement('style');
+style.textContent=`
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+`;
+document.head.appendChild(style);
+
+// ── Utility Functions ────────────────────────────────
+function exportMetrics(){
+  const data={
+    timestamp:new Date().toISOString(),
+    ai:{vram:document.getElementById('vramValue').textContent,queue:document.getElementById('queueCount').textContent},
+    db:{size:'12.4 GB',connections:847,latency:'23ms'},
+    blockchain:{currentBlock:912847,integrity:'verified'}
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`metrics_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+  showToast('✓ Métricas exportadas');
+}
+
+function runMigrationTest(){
+  alert('🧪 Ejecutando test de migración en entorno staging...\n\n✓ Schema validation: OK\n✓ Data integrity check: OK\n✓ Rollback test: OK\n\nTest completado exitosamente.');
+}
+
+// ── Initialize ───────────────────────────────────────
+window.addEventListener('load',()=>{
+  renderLogs();
+  renderChain();
+  
+  // Start auto-refresh
+  refreshInterval=setInterval(()=>{
+    if(autoRefresh){
+      updateAIMetrics();
+      // Add new log entry periodically
+      if(Math.random()>0.7){
+        const newLog={
+          time:new Date().toLocaleTimeString('es-ES',{hour12:false}),
+          level:['info','success','warn'][Math.floor(Math.random()*3)],
+          source:['ollama-api','blockchain','db-pool','rpa-bot'][Math.floor(Math.random()*4)],
+          message:'Auto-generated system event for monitoring demo'
+        };
+        logEntries.unshift(newLog);
+        if(logEntries.length>50)logEntries.pop();
+        renderLogs(document.querySelector('.logs-filter.active').dataset.level);
+      }
+    }
+  },5000);
+  
+  // Trigger reveal animations
+  setTimeout(()=>{
+    document.querySelectorAll('.reveal').forEach((el,i)=>{
+      setTimeout(()=>el.classList.add('in'),i*50);
+    });
+  },100);
+});
+
+// Cleanup on unload
+window.addEventListener('beforeunload',()=>{
+  clearInterval(refreshInterval);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.key==='r'&&e.ctrlKey){
+    e.preventDefault();
+    refreshAll();
+  }
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){
+    e.preventDefault();
+    document.querySelector('.topbar-search input').focus();
+  }
+});
+</script>
+</body>
+</html>
