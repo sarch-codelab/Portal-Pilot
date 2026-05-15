@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Portal Pilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ─── RESET & TOKENS (MISMOS QUE INDEX) ───────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+:root{
+  --bg:       #04040a;
+  --bg2:      #07070f;
+  --bg3:      #0c0c1a;
+  --card:     #0e0e1c;
+  --card2:    #111124;
+  --border:   rgba(139,92,246,0.1);
+  --border2:  rgba(139,92,246,0.22);
+  --accent:   #8b5cf6;
+  --accent2:  #7c3aed;
+  --accent-glow: rgba(139,92,246,0.35);
+  --cyan:     #a78bfa;
+  --white:    #ffffff;
+  --gray:     #5d5d7a;
+  --gray2:    #9ca3af;
+  --text:     #c4c4d4;
+  --green:    #34d399;
+  --red:      #f87171;
+  --yellow:   #fbbf24;
+  --radius:   10px;
+  --radius-lg:18px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow-x:hidden;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;}
+.container{max-width:1400px;margin:0 auto;padding:0 clamp(16px,4vw,40px);}
+
+/* ─── CUSTOM CURSOR ──────────────────────────────────── */
+#cursor-dot{
+  width:6px;height:6px;background:#fff;border-radius:50%;
+  position:fixed;pointer-events:none;z-index:10000;
+  transition:transform 0.1s;
+}
+#cursor-ring{
+  width:36px;height:36px;border:1px solid rgba(139,92,246,0.6);
+  border-radius:50%;position:fixed;pointer-events:none;z-index:9999;
+  transition:transform 0.15s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  transform:translate(-50%,-50%);
+}
+#cursor-glow{
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 70%);
+  position:fixed;pointer-events:none;z-index:0;
+  transform:translate(-50%,-50%);transition:transform 0.08s;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* ─── PROGRESS BAR ──────────────────────────────────── */
+#progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:999;background:transparent;}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));width:0;transition:width .1s linear;}
+
+/* ─── BUTTONS ───────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:40px;font-size:13px;font-weight:600;border:none;transition:all .25s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.btn-acc{background:var(--accent);color:#fff;}
+.btn-acc:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 8px 28px var(--accent-glow);}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid var(--border2);}
+.btn-ghost:hover{background:rgba(139,92,246,0.1);border-color:var(--border2);}
+.btn-white{background:#fff;color:#000;}
+.btn-white:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(255,255,255,0.2);}
+.btn-outline{background:transparent;color:var(--white);border:1px solid var(--border2);}
+.btn-outline:hover{background:rgba(139,92,246,0.08);}
+.btn-sm{padding:8px 18px;font-size:12px;}
+.btn-xs{padding:6px 14px;font-size:11px;}
+
+/* ─── DASHBOARD LAYOUT ──────────────────────────────── */
+.dashboard{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+/* ─── SIDEBAR ───────────────────────────────────────── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--border);
+  padding:24px 16px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:8px;z-index:50;
+}
+.sidebar-logo{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  color:var(--white);display:flex;align-items:center;gap:10px;
+  padding:8px 12px;margin-bottom:24px;border-radius:var(--radius);
+}
+.sidebar-logo .logo-icon{
+  width:28px;height:28px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;
+}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+.sidebar-link{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-radius:var(--radius);font-size:13px;font-weight:500;
+  color:var(--gray2);transition:all .2s;
+}
+.sidebar-link:hover,.sidebar-link.active{
+  background:rgba(139,92,246,0.1);color:var(--white);
+}
+.sidebar-link i{width:18px;text-align:center;font-size:14px;}
+.sidebar-link.active{border-left:2px solid var(--accent);padding-left:14px;}
+.sidebar-footer{
+  padding-top:16px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:8px;
+}
+.sidebar-user{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--radius);background:var(--card);
+}
+.sidebar-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:600;
+}
+.sidebar-username{font-size:12px;font-weight:600;color:var(--white);}
+.sidebar-role{font-size:11px;color:var(--gray);}
+
+/* ─── MAIN CONTENT ──────────────────────────────────── */
+.main-content{display:flex;flex-direction:column;gap:0;}
+
+/* ─── TOP BAR ───────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(4,4,10,0.85);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(16px,4vw,40px);height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.topbar-title{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  color:var(--white);
+}
+.topbar-title span{color:var(--accent);}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:40px;padding:8px 16px;width:280px;
+}
+.topbar-search input{
+  background:none;border:none;outline:none;
+  color:var(--text);font-size:13px;width:100%;
+}
+.topbar-search input::placeholder{color:var(--gray);}
+.topbar-search i{color:var(--gray);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:14px;position:relative;
+  transition:all .2s;
+}
+.topbar-btn:hover{background:rgba(139,92,246,0.1);color:var(--accent);border-color:var(--border2);}
+.topbar-btn .badge{
+  position:absolute;top:-4px;right:-4px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--red);color:#fff;font-size:9px;
+  display:flex;align-items:center;justify-content:center;font-weight:600;
+}
+
+/* ─── DASHBOARD GRID ────────────────────────────────── */
+.dash-grid{
+  padding:clamp(24px,4vw,40px);
+  display:grid;gap:20px;
+  grid-template-columns:repeat(4,1fr);
+}
+
+/* ─── KPI CARDS ─────────────────────────────────────── */
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:20px;
+  display:flex;flex-direction:column;gap:12px;
+  transition:all .3s;
+}
+.kpi-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.kpi-header{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(139,92,246,0.12);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);font-size:16px;
+}
+.kpi-trend{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:4px 10px;
+  border-radius:20px;
+}
+.kpi-trend.up{background:rgba(52,211,153,0.15);color:var(--green);}
+.kpi-trend.down{background:rgba(248,113,113,0.15);color:var(--red);}
+.kpi-value{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(24px,3vw,32px);font-weight:800;
+  color:var(--white);letter-spacing:-1px;
+}
+.kpi-label{font-size:13px;color:var(--gray);}
+.kpi-footer{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--gray);
+}
+
+/* ─── STATUS SEMAPHORE ──────────────────────────────── */
+.status-dot{
+  width:10px;height:10px;border-radius:50%;
+  display:inline-block;margin-right:6px;
+  animation:pulse 2s infinite;
+}
+.status-dot.green{background:var(--green);box-shadow:0 0 12px rgba(52,211,153,0.5);}
+.status-dot.red{background:var(--red);box-shadow:0 0 12px rgba(248,113,113,0.5);}
+.status-dot.yellow{background:var(--yellow);box-shadow:0 0 12px rgba(251,191,36,0.5);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+/* ─── CHART CARDS ───────────────────────────────────── */
+.chart-card{
+  grid-column:span 2;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.chart-header{display:flex;justify-content:space-between;align-items:center;}
+.chart-title{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  color:var(--white);
+}
+.chart-actions{display:flex;gap:8px;}
+.chart-actions button{
+  padding:6px 12px;font-size:11px;border-radius:6px;
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--gray2);transition:all .2s;
+}
+.chart-actions button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chart-container{
+  flex:1;min-height:200px;
+  display:flex;align-items:flex-end;gap:8px;
+  padding:16px 0;border-bottom:1px solid var(--border);
+}
+.chart-bar{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.chart-bar-fill{
+  width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,var(--accent),var(--cyan));
+  transition:height .5s ease;position:relative;
+}
+.chart-bar-fill::after{
+  content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#fff;
+}
+.chart-bar-label{font-size:10px;color:var(--gray);text-align:center;}
+.chart-bar-value{
+  font-size:11px;font-weight:600;color:var(--white);
+  position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+}
+
+/* ─── ALERTS PANEL ──────────────────────────────────── */
+.alerts-panel{
+  grid-column:span 2;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.panel-header{display:flex;justify-content:space-between;align-items:center;}
+.panel-title{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  color:var(--white);display:flex;align-items:center;gap:8px;
+}
+.panel-title i{color:var(--red);}
+.alert-list{display:flex;flex-direction:column;gap:12px;max-height:280px;overflow-y:auto;}
+.alert-item{
+  display:flex;gap:12px;padding:14px;border-radius:var(--radius);
+  background:var(--card2);border-left:3px solid var(--border);
+  transition:border-color .2s;
+}
+.alert-item.critical{border-left-color:var(--red);}
+.alert-item.warning{border-left-color:var(--yellow);}
+.alert-item.info{border-left-color:var(--cyan);}
+.alert-icon{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+}
+.alert-item.critical .alert-icon{background:rgba(248,113,113,0.15);color:var(--red);}
+.alert-item.warning .alert-icon{background:rgba(251,191,36,0.15);color:var(--yellow);}
+.alert-item.info .alert-icon{background:rgba(167,139,250,0.15);color:var(--cyan);}
+.alert-content{flex:1;}
+.alert-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.alert-desc{font-size:12px;color:var(--gray);line-height:1.5;}
+.alert-time{font-size:11px;color:var(--gray);margin-top:6px;}
+
+/* ─── SERVICES PANEL ────────────────────────────────── */
+.services-panel{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.service-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px;border-radius:var(--radius);
+  background:var(--card2);border:1px solid var(--border);
+}
+.service-name{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:500;color:var(--white);
+}
+.service-name i{color:var(--accent);font-size:14px;}
+.service-status{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;
+}
+.service-status .status-dot{margin:0;}
+
+/* ─── RECENT ACTIVITY ───────────────────────────────── */
+.activity-panel{
+  grid-column:span 2;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.activity-list{display:flex;flex-direction:column;gap:14px;}
+.activity-item{
+  display:flex;gap:14px;align-items:flex-start;
+  padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+.activity-item:last-child{padding-bottom:0;border-bottom:none;}
+.activity-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:600;flex-shrink:0;
+}
+.activity-content{flex:1;}
+.activity-text{font-size:13px;color:var(--text);line-height:1.6;}
+.activity-text strong{color:var(--white);}
+.activity-meta{
+  display:flex;gap:12px;margin-top:6px;
+  font-size:11px;color:var(--gray);
+}
+
+/* ─── QUICK ACTIONS ─────────────────────────────────── */
+.quick-actions{
+  display:flex;flex-direction:column;gap:12px;
+}
+.action-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;border-radius:var(--radius);
+  background:var(--card2);border:1px solid var(--border);
+  font-size:13px;font-weight:500;color:var(--white);
+  transition:all .2s;text-align:left;
+}
+.action-btn:hover{border-color:var(--border2);background:rgba(139,92,246,0.08);}
+.action-btn i{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(139,92,246,0.12);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);font-size:14px;
+}
+
+/* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:1200px){
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .chart-card,.alerts-panel,.activity-panel{grid-column:span 2;}
+}
+@media(max-width:900px){
+  .dashboard{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:-240px;top:0;width:240px;transition:left .3s;z-index:100;}
+  .sidebar.open{left:0;}
+  .sidebar-toggle{display:flex !important;}
+  .dash-grid{grid-template-columns:1fr;}
+  .chart-card,.alerts-panel,.activity-panel{grid-column:span 1;}
+  .topbar-search{display:none;}
+}
+@media(max-width:600px){
+  .kpi-card{grid-column:span 2;}
+  .topbar-right .topbar-btn:nth-child(n+3){display:none;}
+}
+
+/* ─── SIDEBAR TOGGLE (MOBILE) ───────────────────────── */
+.sidebar-toggle{
+  display:none;position:fixed;top:16px;left:16px;z-index:60;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  align-items:center;justify-content:center;
+  color:var(--white);font-size:16px;
+}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div id="progress"><div id="progress-fill"></div></div>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div id="cursor-glow"></div>
+
+<!-- SIDEBAR TOGGLE (MOBILE) -->
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-robot"></i></div>
+      PORTAL PILOT
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link active">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-building"></i> Tenants
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-users"></i> Usuarios
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-robot"></i> Bots RPA
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-link"></i> Auditoría
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-chart-line"></i> Analytics
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-cog"></i> Configuración
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-question-circle"></i> Ayuda
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </a>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">AD</div>
+        <div>
+          <div class="sidebar-username">Admin User</div>
+          <div class="sidebar-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Centro de <span>Mando</span></div>
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar tenant, usuario, bot...">
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="badge">3</span>
+        </button>
+        <button class="topbar-btn" title="Mensajes">
+          <i class="fas fa-envelope"></i>
+        </button>
+        <button class="topbar-btn" title="Configuración rápida">
+          <i class="fas fa-sliders-h"></i>
+        </button>
+        <button class="btn btn-acc btn-sm">
+          <i class="fas fa-plus"></i> Nuevo Bot
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD GRID -->
+    <div class="container" style="padding-top:24px;">
+      <div class="dash-grid">
+        
+        <!-- KPI CARDS -->
+        <div class="kpi-card reveal">
+          <div class="kpi-header">
+            <div class="kpi-icon"><i class="fas fa-building"></i></div>
+            <span class="kpi-trend up"><i class="fas fa-arrow-up"></i> +12%</span>
+          </div>
+          <div class="kpi-value">523</div>
+          <div class="kpi-label">Empresas Activas</div>
+          <div class="kpi-footer">
+            <i class="fas fa-circle" style="color:var(--green);font-size:6px;"></i>
+            Todas operativas
+          </div>
+        </div>
+
+        <div class="kpi-card reveal" style="transition-delay:.05s;">
+          <div class="kpi-header">
+            <div class="kpi-icon"><i class="fas fa-users"></i></div>
+            <span class="kpi-trend up"><i class="fas fa-arrow-up"></i> +8%</span>
+          </div>
+          <div class="kpi-value">2,847</div>
+          <div class="kpi-label">Usuarios Totales</div>
+          <div class="kpi-footer">
+            <i class="fas fa-circle" style="color:var(--green);font-size:6px;"></i>
+            142 online ahora
+          </div>
+        </div>
+
+        <div class="kpi-card reveal" style="transition-delay:.1s;">
+          <div class="kpi-header">
+            <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+            <span class="kpi-trend up"><i class="fas fa-arrow-up"></i> +24%</span>
+          </div>
+          <div class="kpi-value">$184K</div>
+          <div class="kpi-label">Ingresos este Mes</div>
+          <div class="kpi-footer">
+            <i class="fas fa-circle" style="color:var(--green);font-size:6px;"></i>
+            Proyección: $210K
+          </div>
+        </div>
+
+        <div class="kpi-card reveal" style="transition-delay:.15s;">
+          <div class="kpi-header">
+            <div class="kpi-icon"><i class="fas fa-server"></i></div>
+            <span class="kpi-trend" style="background:rgba(167,139,250,0.15);color:var(--cyan);">
+              <i class="fas fa-minus"></i> Estable
+            </span>
+          </div>
+          <div class="kpi-value">99.98%</div>
+          <div class="kpi-label">Uptime Infraestructura</div>
+          <div class="kpi-footer">
+            <span class="status-dot green"></span>
+            Ollama + NocoDB OK
+          </div>
+        </div>
+
+        <!-- CHART: NEW TENANTS -->
+        <div class="chart-card reveal">
+          <div class="chart-header">
+            <div class="chart-title">Nuevos Tenants por Semana</div>
+            <div class="chart-actions">
+              <button>7D</button>
+              <button class="active">30D</button>
+              <button>90D</button>
+            </div>
+          </div>
+          <div class="chart-container" id="chartTenants">
+            <!-- Bars generated by JS -->
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray);">
+            <span>Semana 1</span>
+            <span>Semana 4</span>
+          </div>
+        </div>
+
+        <!-- CHART: AI TOKEN USAGE -->
+        <div class="chart-card reveal" style="transition-delay:.1s;">
+          <div class="chart-header">
+            <div class="chart-title">Uso de Tokens de IA (Gemma 3N)</div>
+            <div class="chart-actions">
+              <button>Entrada</button>
+              <button class="active">Total</button>
+              <button>Salida</button>
+            </div>
+          </div>
+          <div class="chart-container" id="chartTokens">
+            <!-- Bars generated by JS -->
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray);">
+            <span>1 Nov</span>
+            <span>30 Nov</span>
+          </div>
+        </div>
+
+        <!-- ALERTS PANEL -->
+        <div class="alerts-panel reveal">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-exclamation-triangle"></i>
+              Alertas Críticas
+            </div>
+            <button class="btn btn-ghost btn-xs">Ver todas</button>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item critical">
+              <div class="alert-icon"><i class="fas fa-times"></i></div>
+              <div class="alert-content">
+                <div class="alert-title">Intento de acceso no autorizado</div>
+                <div class="alert-desc">IP 185.220.101.42 intentó acceder al tenant <strong>FinanceLab</strong> con credenciales inválidas.</div>
+                <div class="alert-time"><i class="fas fa-clock"></i> Hace 12 minutos</div>
+              </div>
+            </div>
+            <div class="alert-item warning">
+              <div class="alert-icon"><i class="fas fa-exclamation"></i></div>
+              <div class="alert-content">
+                <div class="alert-title">Uso elevado de recursos</div>
+                <div class="alert-desc">El nodo de IA <strong>node-ia-03</strong> superó el 85% de uso de GPU durante 15 minutos.</div>
+                <div class="alert-time"><i class="fas fa-clock"></i> Hace 1 hora</div>
+              </div>
+            </div>
+            <div class="alert-item info">
+              <div class="alert-icon"><i class="fas fa-info"></i></div>
+              <div class="alert-content">
+                <div class="alert-title">Actualización de modelo disponible</div>
+                <div class="alert-desc">Nueva versión de Gemma 3N (v1.2.4) lista para despliegue en entorno de staging.</div>
+                <div class="alert-time"><i class="fas fa-clock"></i> Hace 3 horas</div>
+              </div>
+            </div>
+            <div class="alert-item critical">
+              <div class="alert-icon"><i class="fas fa-times"></i></div>
+              <div class="alert-content">
+                <div class="alert-title">Fallo en sincronización blockchain</div>
+                <div class="alert-desc">El servicio de auditoría no pudo registrar 3 hashes en el último batch. Reintentando automáticamente.</div>
+                <div class="alert-time"><i class="fas fa-clock"></i> Hace 5 horas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SERVICES STATUS -->
+        <div class="services-panel reveal">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-heartbeat"></i>
+              Estado de Servicios
+            </div>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-name">
+              <i class="fas fa-plug"></i>
+              API REST
+            </div>
+            <div class="service-status">
+              <span class="status-dot green"></span>
+              Operativo
+            </div>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-name">
+              <i class="fas fa-database"></i>
+              Base de Datos (NocoDB)
+            </div>
+            <div class="service-status">
+              <span class="status-dot green"></span>
+              Operativo
+            </div>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-name">
+              <i class="fas fa-brain"></i>
+              Modelo IA (Gemma 3N)
+            </div>
+            <div class="service-status">
+              <span class="status-dot green"></span>
+              Operativo
+            </div>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-name">
+              <i class="fas fa-link"></i>
+              Auditoría Blockchain
+            </div>
+            <div class="service-status">
+              <span class="status-dot yellow"></span>
+              Degradado
+            </div>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-name">
+              <i class="fas fa-shield-halved"></i>
+              Cyberyx Vantage
+            </div>
+            <div class="service-status">
+              <span class="status-dot green"></span>
+              Operativo
+            </div>
+          </div>
+          
+          <div style="padding-top:12px;">
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;">
+              <i class="fas fa-sync-alt"></i> Verificar todos los servicios
+            </button>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <div class="activity-panel reveal">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-history"></i>
+              Actividad Reciente
+            </div>
+            <button class="btn btn-ghost btn-xs">Ver historial</button>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-avatar">TC</div>
+              <div class="activity-content">
+                <div class="activity-text">
+                  <strong>TechCorp</strong> desplegó un nuevo bot RPA para <em>"Análisis de proveedores Q4"</em>
+                </div>
+                <div class="activity-meta">
+                  <span><i class="fas fa-user"></i> admin@techcorp.io</span>
+                  <span><i class="fas fa-clock"></i> Hace 8 min</span>
+                </div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-avatar">HL</div>
+              <div class="activity-content">
+                <div class="activity-text">
+                  <strong>HealthSys</strong> actualizó configuración de seguridad biométrica
+                </div>
+                <div class="activity-meta">
+                  <span><i class="fas fa-user"></i> security@healthsys.com</span>
+                  <span><i class="fas fa-clock"></i> Hace 24 min</span>
+                </div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-avatar">RP</div>
+              <div class="activity-content">
+                <div class="activity-text">
+                  <strong>RetailPlus</strong> exportó reporte de auditoría blockchain (472 transacciones)
+                </div>
+                <div class="activity-meta">
+                  <span><i class="fas fa-user"></i> ops@retailplus.co</span>
+                  <span><i class="fas fa-clock"></i> Hace 1 hora</span>
+                </div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-avatar">FL</div>
+              <div class="activity-content">
+                <div class="activity-text">
+                  <strong>FinanceLab</strong> activó integración con ERP SAP
+                </div>
+                <div class="activity-meta">
+                  <span><i class="fas fa-user"></i> it@financelab.io</span>
+                  <span><i class="fas fa-clock"></i> Hace 2 horas</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="services-panel reveal">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-bolt"></i>
+              Acciones Rápidas
+            </div>
+          </div>
+          <div class="quick-actions">
+            <button class="action-btn">
+              <i class="fas fa-plus-circle"></i>
+              Crear nuevo tenant
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-robot"></i>
+              Desplegar bot RPA
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-download"></i>
+              Exportar auditoría
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-users-cog"></i>
+              Gestionar permisos
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-sync-alt"></i>
+              Actualizar modelo IA
+            </button>
+            <button class="action-btn" style="border-color:var(--red);">
+              <i class="fas fa-exclamation-circle" style="color:var(--red);"></i>
+              Reportar incidente
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Custom Cursor (MISMO QUE INDEX) ───────────────────
+const dot=document.getElementById('cursor-dot');
+const ring=document.getElementById('cursor-ring');
+const glow=document.getElementById('cursor-glow');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  glow.style.left=mx+'px';glow.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.sidebar-link').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    ring.style.width='50px';ring.style.height='50px';ring.style.opacity='.5';
+  });
+  el.addEventListener('mouseleave',()=>{
+    ring.style.width='36px';ring.style.height='36px';ring.style.opacity='1';
+  });
+});
+
+// ── Scroll Progress ──────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const p=(window.scrollY/(document.documentElement.scrollHeight-innerHeight))*100;
+  document.getElementById('progress-fill').style.width=p+'%';
+});
+
+// ── Reveal on Scroll ─────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting)setTimeout(()=>e.target.classList.add('in'),i*50);
+  });
+},{threshold:0.05});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Sidebar Toggle (Mobile) ──────────────────────────
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  const sidebar=document.getElementById('sidebar');
+  const toggle=document.getElementById('sidebarToggle');
+  if(window.innerWidth<=900 && sidebar.classList.contains('open') && 
+     !sidebar.contains(e.target) && !toggle.contains(e.target)){
+    sidebar.classList.remove('open');
+  }
+});
+
+// ── Chart: New Tenants (Bar Chart) ───────────────────
+function createBarChart(containerId, data, color='var(--accent)'){
+  const container=document.getElementById(containerId);
+  const max=Math.max(...data.map(d=>d.value));
+  container.innerHTML='';
+  data.forEach((d,i)=>{
+    const height=(d.value/max)*160;
+    const bar=document.createElement('div');
+    bar.className='chart-bar';
+    bar.innerHTML=`
+      <div class="chart-bar-fill" style="height:${height}px;background:${color};">
+        <span class="chart-bar-value">${d.value}</span>
+      </div>
+      <span class="chart-bar-label">${d.label}</span>
+    `;
+    container.appendChild(bar);
+    // Animate height
+    setTimeout(()=>{
+      bar.querySelector('.chart-bar-fill').style.height=height+'px';
+    },100+i*80);
+  });
+}
+
+// Sample data for charts
+const tenantsData=[
+  {label:'S1',value:12},{label:'S2',value:18},{label:'S3',value:15},
+  {label:'S4',value:24},{label:'S5',value:31},{label:'S6',value:28},
+  {label:'S7',value:35},{label:'S8',value:42}
+];
+const tokensData=[
+  {label:'1-7',value:45},{label:'8-14',value:62},{label:'15-21',value:78},
+  {label:'22-28',value:91},{label:'29-30',value:54}
+];
+
+// Initialize charts after DOM load
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    createBarChart('chartTenants',tenantsData,'linear-gradient(180deg,#8b5cf6,#a78bfa)');
+    createBarChart('chartTokens',tokensData,'linear-gradient(180deg,#a78bfa,#7c3aed)');
+  },300);
+});
+
+// ── Chart Actions Toggle ─────────────────────────────
+document.querySelectorAll('.chart-actions button').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    // In production: fetch new data based on selection
+  });
+});
+
+// ── Service Status Pulse Animation ───────────────────
+document.querySelectorAll('.status-dot').forEach(dot=>{
+  // Randomize animation delay for natural effect
+  dot.style.animationDelay=Math.random()*2+'s';
+});
+</script>
+</body>
+</html>
