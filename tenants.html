@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenants — Portal Pilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ─── RESET & TOKENS (MISMOS QUE INDEX) ───────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+:root{
+  --bg:       #04040a;
+  --bg2:      #07070f;
+  --bg3:      #0c0c1a;
+  --card:     #0e0e1c;
+  --card2:    #111124;
+  --border:   rgba(139,92,246,0.1);
+  --border2:  rgba(139,92,246,0.22);
+  --accent:   #8b5cf6;
+  --accent2:  #7c3aed;
+  --accent-glow: rgba(139,92,246,0.35);
+  --cyan:     #a78bfa;
+  --white:    #ffffff;
+  --gray:     #5d5d7a;
+  --gray2:    #9ca3af;
+  --text:     #c4c4d4;
+  --green:    #34d399;
+  --red:      #f87171;
+  --yellow:   #fbbf24;
+  --radius:   10px;
+  --radius-lg:18px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow-x:hidden;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;}
+.container{max-width:1400px;margin:0 auto;padding:0 clamp(16px,4vw,40px);}
+
+/* ─── CUSTOM CURSOR ──────────────────────────────────── */
+#cursor-dot{
+  width:6px;height:6px;background:#fff;border-radius:50%;
+  position:fixed;pointer-events:none;z-index:10000;
+  transition:transform 0.1s;
+}
+#cursor-ring{
+  width:36px;height:36px;border:1px solid rgba(139,92,246,0.6);
+  border-radius:50%;position:fixed;pointer-events:none;z-index:9999;
+  transition:transform 0.15s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  transform:translate(-50%,-50%);
+}
+#cursor-glow{
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 70%);
+  position:fixed;pointer-events:none;z-index:0;
+  transform:translate(-50%,-50%);transition:transform 0.08s;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* ─── PROGRESS BAR ──────────────────────────────────── */
+#progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:999;background:transparent;}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));width:0;transition:width .1s linear;}
+
+/* ─── BUTTONS ───────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:40px;font-size:13px;font-weight:600;border:none;transition:all .25s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.btn-acc{background:var(--accent);color:#fff;}
+.btn-acc:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 8px 28px var(--accent-glow);}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid var(--border2);}
+.btn-ghost:hover{background:rgba(139,92,246,0.1);border-color:var(--border2);}
+.btn-white{background:#fff;color:#000;}
+.btn-white:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(255,255,255,0.2);}
+.btn-outline{background:transparent;color:var(--white);border:1px solid var(--border2);}
+.btn-outline:hover{background:rgba(139,92,246,0.08);}
+.btn-danger{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:8px 18px;font-size:12px;}
+.btn-xs{padding:6px 14px;font-size:11px;}
+
+/* ─── DASHBOARD LAYOUT ──────────────────────────────── */
+.dashboard{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+/* ─── SIDEBAR ───────────────────────────────────────── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--border);
+  padding:24px 16px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:8px;z-index:50;
+}
+.sidebar-logo{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  color:var(--white);display:flex;align-items:center;gap:10px;
+  padding:8px 12px;margin-bottom:24px;border-radius:var(--radius);
+}
+.sidebar-logo .logo-icon{
+  width:28px;height:28px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;
+}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+.sidebar-link{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-radius:var(--radius);font-size:13px;font-weight:500;
+  color:var(--gray2);transition:all .2s;
+}
+.sidebar-link:hover,.sidebar-link.active{
+  background:rgba(139,92,246,0.1);color:var(--white);
+}
+.sidebar-link i{width:18px;text-align:center;font-size:14px;}
+.sidebar-link.active{border-left:2px solid var(--accent);padding-left:14px;}
+.sidebar-footer{
+  padding-top:16px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:8px;
+}
+.sidebar-user{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--radius);background:var(--card);
+}
+.sidebar-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:600;
+}
+.sidebar-username{font-size:12px;font-weight:600;color:var(--white);}
+.sidebar-role{font-size:11px;color:var(--gray);}
+
+/* ─── MAIN CONTENT ──────────────────────────────────── */
+.main-content{display:flex;flex-direction:column;gap:0;}
+
+/* ─── TOP BAR ───────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(4,4,10,0.85);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(16px,4vw,40px);height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.topbar-title{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  color:var(--white);
+}
+.topbar-title span{color:var(--accent);}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:40px;padding:8px 16px;width:320px;
+}
+.topbar-search input{
+  background:none;border:none;outline:none;
+  color:var(--text);font-size:13px;width:100%;
+}
+.topbar-search input::placeholder{color:var(--gray);}
+.topbar-search i{color:var(--gray);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:14px;position:relative;
+  transition:all .2s;
+}
+.topbar-btn:hover{background:rgba(139,92,246,0.1);color:var(--accent);border-color:var(--border2);}
+.topbar-btn .badge{
+  position:absolute;top:-4px;right:-4px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--red);color:#fff;font-size:9px;
+  display:flex;align-items:center;justify-content:center;font-weight:600;
+}
+
+/* ─── PAGE HEADER ───────────────────────────────────── */
+.page-header{
+  padding:clamp(24px,4vw,40px) clamp(16px,4vw,40px) 24px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-wrap:wrap;gap:16px;border-bottom:1px solid var(--border);
+}
+.page-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(24px,4vw,32px);font-weight:800;
+  color:var(--white);letter-spacing:-1px;
+}
+.page-title span{color:var(--accent);}
+.page-subtitle{font-size:14px;color:var(--gray);max-width:480px;line-height:1.6;}
+.page-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* ─── FILTERS BAR ───────────────────────────────────── */
+.filters-bar{
+  padding:16px clamp(16px,4vw,40px);
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+}
+.filter-group{display:flex;align-items:center;gap:8px;}
+.filter-group label{font-size:12px;color:var(--gray);font-weight:500;}
+.filter-select{
+  padding:8px 14px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text);font-size:13px;outline:none;
+  cursor:pointer;transition:border-color .2s;
+}
+.filter-select:focus{border-color:var(--accent);}
+.filter-select option{background:var(--card2);}
+.filter-btn{
+  padding:8px 16px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--gray2);font-size:12px;transition:all .2s;
+}
+.filter-btn:hover,.filter-btn.active{
+  background:rgba(139,92,246,0.1);color:var(--white);border-color:var(--border2);
+}
+.filter-reset{
+  margin-left:auto;display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--gray);background:none;border:none;
+  cursor:pointer;transition:color .2s;
+}
+.filter-reset:hover{color:var(--accent);}
+
+/* ─── TENANTS TABLE ─────────────────────────────────── */
+.table-container{
+  padding:24px clamp(16px,4vw,40px);
+  overflow-x:auto;
+}
+.tenants-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+}
+.tenants-table thead{
+  background:var(--card2);border-bottom:1px solid var(--border);
+}
+.tenants-table th{
+  padding:16px 20px;text-align:left;
+  font-size:11px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--gray);
+}
+.tenants-table th.sortable{cursor:pointer;user-select:none;}
+.tenants-table th.sortable:hover{color:var(--white);}
+.tenants-table th.sortable::after{
+  content:'\f0dc';font-family:'Font Awesome 6 Free';font-weight:900;
+  margin-left:6px;font-size:10px;color:var(--gray);opacity:.5;
+}
+.tenants-table th.sortable.asc::after{content:'\f0de';opacity:1;color:var(--accent);}
+.tenants-table th.sortable.desc::after{content:'\f0dd';opacity:1;color:var(--accent);}
+.tenants-table tbody tr{
+  border-bottom:1px solid var(--border);
+  transition:background .2s;cursor:pointer;
+}
+.tenants-table tbody tr:hover{background:rgba(139,92,246,0.06);}
+.tenants-table tbody tr:last-child{border-bottom:none;}
+.tenants-table td{
+  padding:16px 20px;font-size:13px;color:var(--text);
+}
+.tenants-table td:first-child{border-left:none;}
+.tenants-table td:last-child{border-right:none;}
+
+/* Tenant Info */
+.tenant-info{display:flex;align-items:center;gap:12px;}
+.tenant-avatar{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:700;flex-shrink:0;
+}
+.tenant-name{font-weight:600;color:var(--white);}
+.tenant-id{font-size:11px;color:var(--gray);font-family:monospace;}
+
+/* Status Badge */
+.status-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:20px;
+  font-size:11px;font-weight:600;
+}
+.status-badge.active{background:rgba(52,211,153,0.15);color:var(--green);}
+.status-badge.suspended{background:rgba(248,113,113,0.15);color:var(--red);}
+.status-badge.pending{background:rgba(251,191,36,0.15);color:var(--yellow);}
+.status-dot{width:6px;height:6px;border-radius:50%;}
+.status-badge.active .status-dot{background:var(--green);}
+.status-badge.suspended .status-dot{background:var(--red);}
+.status-badge.pending .status-dot{background:var(--yellow);}
+
+/* Plan Badge */
+.plan-badge{
+  display:inline-block;padding:4px 12px;border-radius:6px;
+  font-size:11px;font-weight:600;
+}
+.plan-badge.starter{background:rgba(167,139,250,0.15);color:var(--cyan);}
+.plan-badge.business{background:var(--accent);color:#fff;}
+.plan-badge.enterprise{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;}
+
+/* Actions */
+.tenant-actions{display:flex;gap:6px;}
+.action-icon-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--card2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:12px;transition:all .2s;
+}
+.action-icon-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.action-icon-btn.danger:hover{background:var(--red);border-color:var(--red);}
+
+/* ─── MODAL ─────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  z-index:1000;opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.active{opacity:1;pointer-events:auto;}
+.modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;transform:translateY(20px);
+  transition:transform .3s;
+}
+.modal-overlay.active .modal{transform:translateY(0);}
+.modal-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:14px;cursor:pointer;
+  transition:all .2s;
+}
+.modal-close:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.modal-body{padding:24px;}
+.modal-footer{
+  padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:12px;
+}
+
+/* Form Styles */
+.form-group{margin-bottom:20px;}
+.form-label{
+  display:block;font-size:12px;font-weight:600;
+  color:var(--gray);margin-bottom:8px;letter-spacing:.5px;
+}
+.form-input{
+  width:100%;padding:12px 16px;border-radius:8px;
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--text);font-size:14px;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--accent);}
+.form-input::placeholder{color:var(--gray);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-select{
+  width:100%;padding:12px 16px;border-radius:8px;
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--text);font-size:14px;outline:none;
+  cursor:pointer;
+}
+.form-select option{background:var(--card2);}
+.form-hint{font-size:11px;color:var(--gray);margin-top:6px;}
+
+/* ─── TENANT DETAIL PANEL ───────────────────────────── */
+.detail-panel{
+  position:fixed;top:0;right:-480px;width:480px;
+  height:100vh;background:var(--bg2);border-left:1px solid var(--border);
+  z-index:200;transition:right .3s ease;display:flex;flex-direction:column;
+}
+.detail-panel.active{right:0;}
+.detail-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.detail-close{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray2);font-size:14px;cursor:pointer;
+}
+.detail-body{flex:1;overflow-y:auto;padding:24px;}
+.detail-section{margin-bottom:32px;}
+.detail-section-title{
+  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+  color:var(--white);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.detail-section-title i{color:var(--accent);}
+
+/* Tenant Detail Header */
+.tenant-detail-header{
+  display:flex;gap:16px;padding-bottom:24px;border-bottom:1px solid var(--border);
+  margin-bottom:24px;
+}
+.tenant-detail-avatar{
+  width:56px;height:56px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;font-weight:800;
+}
+.tenant-detail-info .name{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);
+}
+.tenant-detail-info .id{font-size:12px;color:var(--gray);font-family:monospace;margin:4px 0;}
+.tenant-detail-info .plan{display:inline-block;margin-top:8px;}
+
+/* Detail Stats */
+.detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.detail-stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+}
+.detail-stat-value{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent);
+}
+.detail-stat-label{font-size:11px;color:var(--gray);margin-top:4px;}
+
+/* Users List */
+.users-list{display:flex;flex-direction:column;gap:12px;}
+.user-item{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.user-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:#fff;font-weight:600;
+}
+.user-info{flex:1;}
+.user-name{font-size:13px;font-weight:600;color:var(--white);}
+.user-email{font-size:11px;color:var(--gray);}
+.user-role{font-size:10px;background:var(--card2);padding:2px 8px;border-radius:4px;color:var(--gray2);}
+
+/* Logs List */
+.logs-list{display:flex;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto;}
+.log-item{
+  padding:10px 12px;background:var(--card);border:1px solid var(--border);
+  border-radius:8px;font-size:12px;color:var(--gray);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.log-item .log-action{color:var(--text);font-weight:500;}
+.log-item .log-time{font-size:10px;color:var(--gray);}
+
+/* ─── PAGINATION ────────────────────────────────────── */
+.pagination{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px clamp(16px,4vw,40px);border-top:1px solid var(--border);
+}
+.pagination-info{font-size:12px;color:var(--gray);}
+.pagination-btns{display:flex;gap:8px;}
+.pagination-btn{
+  padding:8px 16px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text);font-size:12px;transition:all .2s;
+}
+.pagination-btn:hover:not(:disabled){background:rgba(139,92,246,0.1);border-color:var(--border2);}
+.pagination-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:1200px){
+  .detail-panel{width:100%;max-width:400px;}
+  .form-row{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .dashboard{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:-240px;top:0;width:240px;transition:left .3s;z-index:100;}
+  .sidebar.open{left:0;}
+  .sidebar-toggle{display:flex !important;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+  .filters-bar{flex-wrap:wrap;}
+  .filter-reset{margin-left:0;width:100%;justify-content:center;}
+}
+@media(max-width:600px){
+  .tenants-table{font-size:12px;}
+  .tenants-table th,.tenants-table td{padding:12px 14px;}
+  .tenant-actions{gap:4px;}
+  .action-icon-btn{width:28px;height:28px;font-size:11px;}
+  .page-actions{width:100%;justify-content:space-between;}
+}
+
+/* ─── SIDEBAR TOGGLE (MOBILE) ───────────────────────── */
+.sidebar-toggle{
+  display:none;position:fixed;top:16px;left:16px;z-index:60;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  align-items:center;justify-content:center;
+  color:var(--white);font-size:16px;
+}
+
+/* ─── EMPTY STATE ───────────────────────────────────── */
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--gray);
+}
+.empty-state i{font-size:48px;color:var(--border2);margin-bottom:16px;}
+.empty-state p{font-size:14px;margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div id="progress"><div id="progress-fill"></div></div>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div id="cursor-glow"></div>
+
+<!-- SIDEBAR TOGGLE (MOBILE) -->
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- MODAL: CREATE TENANT -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-plus" style="margin-right:8px;color:var(--accent);"></i>Nuevo Tenant</div>
+      <button class="modal-close" onclick="closeModal('createModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="createTenantForm">
+        <div class="form-group">
+          <label class="form-label">Nombre de la Empresa *</label>
+          <input type="text" class="form-input" placeholder="Ej: TechCorp Solutions" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Dominio *</label>
+            <input type="text" class="form-input" placeholder="techcorp.portalpilot.io" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Plan *</label>
+            <select class="form-select" required>
+              <option value="">Seleccionar...</option>
+              <option value="starter">Starter</option>
+              <option value="business" selected>Business</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Admin *</label>
+          <input type="email" class="form-input" placeholder="admin@empresa.com" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">País</label>
+            <select class="form-select">
+              <option value="">Seleccionar...</option>
+              <option value="mx" selected>México</option>
+              <option value="es">España</option>
+              <option value="co">Colombia</option>
+              <option value="ar">Argentina</option>
+              <option value="us">Estados Unidos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zona Horaria</label>
+            <select class="form-select">
+              <option value="America/Mexico_City" selected>México (GMT-6)</option>
+              <option value="Europe/Madrid">España (GMT+1)</option>
+              <option value="America/Bogota">Colombia (GMT-5)</option>
+              <option value="America/Argentina/Buenos_Aires">Argentina (GMT-3)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notas Internas</label>
+          <textarea class="form-input" rows="3" placeholder="Información adicional para el equipo..."></textarea>
+          <div class="form-hint"><i class="fas fa-info-circle"></i> Solo visible para administradores</div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('createModal')">Cancelar</button>
+      <button class="btn btn-acc" onclick="createTenant()"><i class="fas fa-rocket"></i> Crear Tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRM ACTION -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="confirmTitle">Confirmar Acción</div>
+      <button class="modal-close" onclick="closeModal('confirmModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage" style="font-size:14px;color:var(--gray);line-height:1.6;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Cancelar</button>
+      <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div class="modal-title">Detalle de Tenant</div>
+    <button class="detail-close" onclick="closeDetailPanel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="detail-body" id="detailContent">
+    <!-- Content loaded dynamically -->
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-robot"></i></div>
+      PORTAL PILOT
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="tenants.html" class="sidebar-link active">
+        <i class="fas fa-building"></i> Tenants
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-users"></i> Usuarios
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-robot"></i> Bots RPA
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-link"></i> Auditoría
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-chart-line"></i> Analytics
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-cog"></i> Configuración
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-question-circle"></i> Ayuda
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </a>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">AD</div>
+        <div>
+          <div class="sidebar-username">Admin User</div>
+          <div class="sidebar-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Gestión de <span>Tenants</span></div>
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Buscar empresa, dominio, email..." onkeyup="filterTenants()">
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="badge">2</span>
+        </button>
+        <button class="btn btn-acc btn-sm" onclick="openModal('createModal')">
+          <i class="fas fa-plus"></i> Nuevo Tenant
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Empresas <span>Activas</span></h1>
+        <p class="page-subtitle">Administra todas las empresas registradas en tu plataforma. Gestiona planes, usuarios y accede a logs específicos de cada tenant.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportTenants()">
+          <i class="fas fa-download"></i> Exportar CSV
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="refreshTenants()">
+          <i class="fas fa-sync-alt"></i> Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTERS BAR -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Plan:</label>
+        <select class="filter-select" id="filterPlan" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="starter">Starter</option>
+          <option value="business">Business</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Estado:</label>
+        <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="active">Activo</option>
+          <option value="suspended">Suspendido</option>
+          <option value="pending">Pendiente</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ordenar por:</label>
+        <select class="filter-select" id="filterSort" onchange="applyFilters()">
+          <option value="name">Nombre</option>
+          <option value="date" selected>Fecha Registro</option>
+          <option value="users">N° Usuarios</option>
+          <option value="plan">Plan</option>
+        </select>
+      </div>
+      <button class="filter-reset" onclick="resetFilters()">
+        <i class="fas fa-undo"></i> Limpiar filtros
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+      <table class="tenants-table">
+        <thead>
+          <tr>
+            <th class="sortable asc" data-sort="name">Empresa</th>
+            <th class="sortable" data-sort="plan">Plan</th>
+            <th class="sortable" data-sort="status">Estado</th>
+            <th class="sortable" data-sort="users">Usuarios</th>
+            <th class="sortable" data-sort="date">Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tenantsBody">
+          <!-- Rows generated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <div class="pagination-info">Mostrando <strong>1-10</strong> de <strong>523</strong> tenants</div>
+      <div class="pagination-btns">
+        <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+        <button class="pagination-btn active">1</button>
+        <button class="pagination-btn">2</button>
+        <button class="pagination-btn">3</button>
+        <button class="pagination-btn">...</button>
+        <button class="pagination-btn">52</button>
+        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Custom Cursor (MISMO QUE INDEX) ───────────────────
+const dot=document.getElementById('cursor-dot');
+const ring=document.getElementById('cursor-ring');
+const glow=document.getElementById('cursor-glow');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  glow.style.left=mx+'px';glow.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.sidebar-link,.action-icon-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    ring.style.width='50px';ring.style.height='50px';ring.style.opacity='.5';
+  });
+  el.addEventListener('mouseleave',()=>{
+    ring.style.width='36px';ring.style.height='36px';ring.style.opacity='1';
+  });
+});
+
+// ── Scroll Progress ──────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const p=(window.scrollY/(document.documentElement.scrollHeight-innerHeight))*100;
+  document.getElementById('progress-fill').style.width=p+'%';
+});
+
+// ── Reveal on Scroll ─────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting)setTimeout(()=>e.target.classList.add('in'),i*50);
+  });
+},{threshold:0.05});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Sidebar Toggle (Mobile) ──────────────────────────
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  const sidebar=document.getElementById('sidebar');
+  const toggle=document.getElementById('sidebarToggle');
+  if(window.innerWidth<=900 && sidebar.classList.contains('open') && 
+     !sidebar.contains(e.target) && !toggle.contains(e.target)){
+    sidebar.classList.remove('open');
+  }
+});
+
+// ── Sample Tenant Data ───────────────────────────────
+const tenants=[
+  {id:'TC-001',name:'TechCorp Solutions',domain:'techcorp.portalpilot.io',plan:'enterprise',status:'active',users:47,registered:'2026-01-15',country:'MX'},
+  {id:'HL-002',name:'HealthSys Medical',domain:'healthsys.portalpilot.io',plan:'business',status:'active',users:23,registered:'2026-02-03',country:'MX'},
+  {id:'RP-003',name:'RetailPlus Chain',domain:'retailplus.portalpilot.io',plan:'business',status:'active',users:31,registered:'2026-02-18',country:'CO'},
+  {id:'FL-004',name:'FinanceLab Analytics',domain:'financelab.portalpilot.io',plan:'enterprise',status:'active',users:56,registered:'2026-03-01',country:'ES'},
+  {id:'LS-005',name:'LogiSoft Transport',domain:'logisoft.portalpilot.io',plan:'starter',status:'pending',users:8,registered:'2026-04-12',country:'AR'},
+  {id:'IH-006',name:'Infinihon Corp',domain:'infinihon.portalpilot.io',plan:'business',status:'suspended',users:19,registered:'2026-03-22',country:'MX'},
+  {id:'ED-007',name:'EduPlatform Global',domain:'eduplatform.portalpilot.io',plan:'starter',status:'active',users:12,registered:'2026-04-28',country:'US'},
+  {id:'MF-008',name:'ManufacturaFlex',domain:'mflex.portalpilot.io',plan:'enterprise',status:'active',users:64,registered:'2026-01-08',country:'MX'},
+  {id:'AG-009',name:'AgroTech Innovations',domain:'agrotech.portalpilot.io',plan:'business',status:'active',users:28,registered:'2026-03-15',country:'CO'},
+  {id:'CY-010',name:'CyberSecure Ltd',domain:'cybersec.portalpilot.io',plan:'enterprise',status:'active',users:41,registered:'2026-02-27',country:'ES'}
+];
+
+// ── Render Table ─────────────────────────────────────
+function renderTenants(data=tenants){
+  const tbody=document.getElementById('tenantsBody');
+  tbody.innerHTML='';
+  
+  data.forEach((t,i)=>{
+    const row=document.createElement('tr');
+    row.onclick=(e)=>{if(!e.target.closest('.tenant-actions')) openDetailPanel(t);};
+    row.innerHTML=`
+      <td>
+        <div class="tenant-info">
+          <div class="tenant-avatar">${t.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div>
+            <div class="tenant-name">${t.name}</div>
+            <div class="tenant-id">${t.domain}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="plan-badge ${t.plan}">${t.plan.charAt(0).toUpperCase()+t.plan.slice(1)}</span></td>
+      <td><span class="status-badge ${t.status}"><span class="status-dot"></span>${t.status.charAt(0).toUpperCase()+t.status.slice(1)}</span></td>
+      <td>${t.users}</td>
+      <td>${new Date(t.registered).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}</td>
+      <td>
+        <div class="tenant-actions">
+          <button class="action-icon-btn" title="Ver detalle" onclick="event.stopPropagation();openDetailPanel('${t.id}')"><i class="fas fa-eye"></i></button>
+          <button class="action-icon-btn" title="Cambiar plan" onclick="event.stopPropagation();showChangePlan('${t.id}')"><i class="fas fa-exchange-alt"></i></button>
+          <button class="action-icon-btn" title="Reset password" onclick="event.stopPropagation();confirmAction('Reset Password','¿Resetear contraseña de admin para ${t.name}?',()=>resetPassword('${t.id}'))"><i class="fas fa-key"></i></button>
+          <button class="action-icon-btn danger" title="${t.status==='active'?'Bloquear':'Desbloquear'}" onclick="event.stopPropagation();confirmAction('${t.status==='active'?'Bloquear':'Desbloquear'} Tenant','¿${t.status==='active'?'Bloquear':'Desbloquear'} ${t.name}?',()=>toggleStatus('${t.id}','${t.status}'))"><i class="fas fa-${t.status==='active'?'ban':'unlock'}"></i></button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ── Filter & Search ──────────────────────────────────
+function filterTenants(){
+  const query=document.getElementById('globalSearch').value.toLowerCase();
+  const plan=document.getElementById('filterPlan').value;
+  const status=document.getElementById('filterStatus').value;
+  
+  const filtered=tenants.filter(t=>{
+    const matchesSearch=t.name.toLowerCase().includes(query)||t.domain.toLowerCase().includes(query)||t.id.toLowerCase().includes(query);
+    const matchesPlan=!plan||t.plan===plan;
+    const matchesStatus=!status||t.status===status;
+    return matchesSearch&&matchesPlan&&matchesStatus;
+  });
+  renderTenants(filtered);
+}
+
+function applyFilters(){filterTenants();}
+function resetFilters(){
+  document.getElementById('globalSearch').value='';
+  document.getElementById('filterPlan').value='';
+  document.getElementById('filterStatus').value='';
+  document.getElementById('filterSort').value='date';
+  renderTenants(tenants);
+}
+
+// ── Modal Functions ──────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('active');}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+
+// ── Create Tenant ────────────────────────────────────
+function createTenant(){
+  const form=document.getElementById('createTenantForm');
+  if(form.checkValidity()){
+    // Simulate API call
+    const btn=form.closest('.modal').querySelector('.btn-acc');
+    const orig=btn.innerHTML;
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Creando...';
+    btn.disabled=true;
+    
+    setTimeout(()=>{
+      alert('✓ Tenant creado exitosamente');
+      closeModal('createModal');
+      form.reset();
+      btn.innerHTML=orig;
+      btn.disabled=false;
+      refreshTenants();
+    },1500);
+  }else{
+    form.reportValidity();
+  }
+}
+
+// ── Confirm Action Modal ─────────────────────────────
+let pendingAction=null;
+function confirmAction(title,message,callback){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMessage').textContent=message;
+  pendingAction=callback;
+  document.getElementById('confirmActionBtn').onclick=()=>{
+    if(pendingAction)pendingAction();
+    closeModal('confirmModal');
+    pendingAction=null;
+  };
+  openModal('confirmModal');
+}
+
+// ── Quick Actions ────────────────────────────────────
+function toggleStatus(id,currentStatus){
+  // Simulate API call
+  alert(`✓ ${currentStatus==='active'?'Bloqueado':'Desbloqueado'} exitosamente`);
+  refreshTenants();
+}
+
+function resetPassword(id){
+  // Simulate API call
+  alert('✓ Contraseña de admin reseteada. Nuevo password enviado por email seguro.');
+}
+
+function showChangePlan(id){
+  const tenant=tenants.find(t=>t.id===id);
+  const newPlan=prompt(`Cambiar plan para ${tenant.name}:\n(starter/business/enterprise)`,tenant.plan);
+  if(newPlan&&['starter','business','enterprise'].includes(newPlan)){
+    alert(`✓ Plan actualizado a ${newPlan}`);
+    refreshTenants();
+  }
+}
+
+// ── Detail Panel ─────────────────────────────────────
+function openDetailPanel(tenant){
+  if(typeof tenant==='string')tenant=tenants.find(t=>t.id===tenant);
+  if(!tenant)return;
+  
+  const content=document.getElementById('detailContent');
+  content.innerHTML=`
+    <div class="tenant-detail-header">
+      <div class="tenant-detail-avatar">${tenant.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
+      <div class="tenant-detail-info">
+        <div class="name">${tenant.name}</div>
+        <div class="id">${tenant.id} · ${tenant.domain}</div>
+        <span class="plan-badge ${tenant.plan}">${tenant.plan.charAt(0).toUpperCase()+tenant.plan.slice(1)}</span>
+        <span class="status-badge ${tenant.status}" style="margin-left:8px;"><span class="status-dot"></span>${tenant.status.charAt(0).toUpperCase()+tenant.status.slice(1)}</span>
+      </div>
+    </div>
+    
+    <div class="detail-stats">
+      <div class="detail-stat">
+        <div class="detail-stat-value">${tenant.users}</div>
+        <div class="detail-stat-label">Usuarios Activos</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-value">${Math.floor(Math.random()*500)+50}K</div>
+        <div class="detail-stat-label">Tokens IA este mes</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-value">${Math.floor(Math.random()*20)+5}</div>
+        <div class="detail-stat-label">Bots RPA Activos</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-value">99.9%</div>
+        <div class="detail-stat-label">Uptime SLA</div>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <div class="detail-section-title"><i class="fas fa-users"></i> Usuarios del Tenant</div>
+      <div class="users-list">
+        <div class="user-item">
+          <div class="user-avatar">AM</div>
+          <div class="user-info">
+            <div class="user-name">Ana Martínez</div>
+            <div class="user-email">ana@${tenant.domain}</div>
+          </div>
+          <span class="user-role">Admin</span>
+        </div>
+        <div class="user-item">
+          <div class="user-avatar">JR</div>
+          <div class="user-info">
+            <div class="user-name">Juan Rodríguez</div>
+            <div class="user-email">juan@${tenant.domain}</div>
+          </div>
+          <span class="user-role">Operator</span>
+        </div>
+        <div class="user-item">
+          <div class="user-avatar">LS</div>
+          <div class="user-info">
+            <div class="user-name">Laura Sánchez</div>
+            <div class="user-email">laura@${tenant.domain}</div>
+          </div>
+          <span class="user-role">Viewer</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <div class="detail-section-title"><i class="fas fa-history"></i> Logs Recientes</div>
+      <div class="logs-list">
+        <div class="log-item">
+          <span class="log-action">Bot RPA ejecutado: "Cotización proveedores"</span>
+          <span class="log-time">Hace 12 min</span>
+        </div>
+        <div class="log-item">
+          <span class="log-action">Nuevo usuario registrado</span>
+          <span class="log-time">Hace 1 h</span>
+        </div>
+        <div class="log-item">
+          <span class="log-action">Hash blockchain generado: 0x8f2a...</span>
+          <span class="log-time">Hace 3 h</span>
+        </div>
+        <div class="log-item">
+          <span class="log-action">Plan actualizado: Business → Enterprise</span>
+          <span class="log-time">Hace 1 d</span>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="alert('Reporte generado')"><i class="fas fa-file-export"></i> Exportar Logs</button>
+      <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;" onclick="alert('Soporte notificado')"><i class="fas fa-headset"></i> Contactar Soporte</button>
+    </div>
+  `;
+  document.getElementById('detailPanel').classList.add('active');
+}
+
+function closeDetailPanel(){
+  document.getElementById('detailPanel').classList.remove('active');
+}
+
+// Close detail panel on overlay click
+document.getElementById('detailPanel').addEventListener('click',e=>{
+  if(e.target.id==='detailPanel')closeDetailPanel();
+});
+
+// ── Utility Functions ────────────────────────────────
+function refreshTenants(){
+  const btn=document.querySelector('.page-actions .btn-ghost');
+  const icon=btn.querySelector('i');
+  icon.classList.add('fa-spin');
+  setTimeout(()=>{
+    icon.classList.remove('fa-spin');
+    renderTenants(tenants);
+    alert('✓ Datos actualizados');
+  },800);
+}
+
+function exportTenants(){
+  alert('✓ Exportando CSV...\n\nEl archivo "tenants_export_2026.csv" se descargará en breve.');
+}
+
+// ── Table Sorting ────────────────────────────────────
+document.querySelectorAll('.tenants-table th.sortable').forEach(th=>{
+  th.addEventListener('click',function(){
+    const sort=this.dataset.sort;
+    const isAsc=this.classList.contains('asc');
+    
+    // Reset all
+    document.querySelectorAll('.tenants-table th.sortable').forEach(h=>{
+      h.classList.remove('asc','desc');
+    });
+    
+    // Set current
+    this.classList.add(isAsc?'desc':'asc');
+    
+    // Sort data
+    const sorted=[...tenants].sort((a,b)=>{
+      let valA=a[sort],valB=b[sort];
+      if(sort==='date'){valA=new Date(a.registered);valB=new Date(b.registered);}
+      if(typeof valA==='string')valA=valA.toLowerCase();
+      if(typeof valB==='string')valB=valB.toLowerCase();
+      return isAsc?(valA>valB?1:-1):(valA<valB?1:-1);
+    });
+    renderTenants(sorted);
+  });
+});
+
+// ── Initialize ───────────────────────────────────────
+window.addEventListener('load',()=>{
+  renderTenants(tenants);
+  // Trigger reveal animations
+  setTimeout(()=>{
+    document.querySelectorAll('.reveal').forEach((el,i)=>{
+      setTimeout(()=>el.classList.add('in'),i*50);
+    });
+  },100);
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay)overlay.classList.remove('active');
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));
+    closeDetailPanel();
+  }
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+  }
+  if(e.key==='n'&&e.ctrlKey){
+    e.preventDefault();
+    openModal('createModal');
+  }
+});
+</script>
+</body>
+</html>
